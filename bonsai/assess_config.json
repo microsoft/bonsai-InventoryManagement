@@ -1,0 +1,26 @@
+{
+    "episodeConfigurations": {
+        "demand_distribution_profile": 5,
+        "sigmax": 10,
+        "offset": 20,
+        "amp1": 5,
+        "ph1": 0.02,
+        "amp2": 3,
+        "ph2": 0.05,
+        "randvar": 1,
+        "initial_inventory_low": 1,
+        "initial_inventory_high": 10,
+        "initial_inventory": [33,40,100],
+        "lead_profile": 2,
+        "solver": 1,
+        "filter_alpha": 0.2,
+        "missed_sale_to_inventory_cost_ratio": 10,
+        "action_frequency": 10,
+        "number_of_sku": 200,
+        "number_of_stages": 4, 
+        "constraint_coupling": 1,
+        "inventory_capacity": 5000,
+        "mode": "assessment"
+    },
+    "episodeLength": 200
+}
