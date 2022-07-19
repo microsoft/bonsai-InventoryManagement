@@ -1,13 +1,14 @@
+'''
+Author: Sandip Kulkarny, Hossein K. Heris
+'''
 from typing import List
-#from anyio import start_blocking_portal
-import numpy as np
 from random import random
 import numpy as np
 from matplotlib import pyplot as plt
 
 
 def gen_custom_demand(sigmax: int = 6, offset: float = 5, amp1: float = 5, ph1: float = 0.02, amp2: float = 3, ph2: float = 0.05, randvar: float = 15,
-                      start_index = 0, end_index = float('Inf')):
+                      start_index=0, end_index=float('Inf')):
     """
     To generate synthetic forecast data that has
     (1) peaks and valleys using two sinusoidal function 
@@ -34,7 +35,7 @@ def gen_custom_demand(sigmax: int = 6, offset: float = 5, amp1: float = 5, ph1: 
 
     demand_forecast = np.maximum(demand_forecast, 0)
     demand_actual = np.maximum(demand_actual, 0)
-    
+
     if end_index == float('Inf'):
         demand_info = {
             'demand_actual': demand_actual[start_index:].astype(int),

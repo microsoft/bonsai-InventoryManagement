@@ -6,5 +6,5 @@ from typing import List
 
 
 @dataclass
-class SupplyChainTopography:
+class SupplyChainTopology:
     number_of_stages: int = field(default=4)

@@ -1,6 +1,6 @@
 '''
 __author__: Hossein Khadivi Heris
-@Microsoft 
+@Microsoft 06/19/2022
 '''
 from dataclasses import dataclass, field, asdict, replace
 from abc import ABC, abstractmethod
@@ -11,24 +11,25 @@ import string
 import numpy as np
 from typing import Union, List, Deque, Dict, Type
 from collections import deque
-from or_gym.utils_demand import gen_custom_demand
+from utils_demand import gen_custom_demand
 from numpy.random import randint
-from or_gym.envs.supply_chain.multi_sku_constraints import MultiSKUConstraints
-from or_gym.envs.supply_chain.chain_definition import SupplyChainTopography
-from or_gym.utils import make_lead_profile
+from multi_sku_constraints import MultiSKUConstraints
+from chain_definition import SupplyChainTopology
+from utils import make_lead_profile
 '''
-This code 
-(1) defines properties of multisku
-(2) generates data for multisku 
+Follows a factory design pattern to create different skus 
 '''
+
 
 def generate_name() -> str:
     return "".join(random.choices(string.ascii_uppercase, k=12))
+
 
 def load_sku_info(filename: str):
     with open(filename) as f:
         info = json.load(f)
     return info
+
 
 def generate_random_sku_info_as_json(n_skus = 1, n_stages = 4, ratio = 100): 
     missed_sale_to_inventory_cost_ratio = ratio
@@ -66,17 +67,18 @@ def generate_random_sku_info_as_json2(n_skus = 1, n_stages = 4):
                            unit_price = unit_price.tolist(),
                            unit_cost = unit_cost.tolist(),
                            batch = n_stages*[0], 
-                           missed_sale_cost=missed_sale_cost.tolist()))
-        
+                           missed_sale_cost=missed_sale_cost.tolist()))   
     with open('sku_properties.json', "w") as f:
         json.dump(sku_info, f)
     return sku_info
+
 
 @dataclass
 class demand_info:
     demand_actual: List[int] 
     demand_forecast: List[int]
     forecast_sigma: List[int] 
+
 
 # any property of sku should be in the following data class 
 @dataclass
@@ -93,7 +95,7 @@ class SKUGenericInfo:
     batch: List[int]
     name: str = field(init = True, default_factory=generate_name)
 
-                     
+                    
 @dataclass
 class SKUDynamicInfo:
     '''
@@ -151,7 +153,7 @@ class SKUInfoFactory(InfoFactory):
     sku_count: int = 10
     n_levels: int = 3
     info = SKUsCollection(generic={}, dynamic ={})
-    def __init__(self, sku_count: int = 10, topography: SupplyChainTopography = SupplyChainTopography(), config: dict = {}):
+    def __init__(self, sku_count: int = 10, topography: SupplyChainTopology = SupplyChainTopology(), config: dict = {}):
         self.sku_count = sku_count
         self.n_levels = (topography.number_of_stages-1) # last stage has infinite supply for dynamic property 
         try:
@@ -271,8 +273,6 @@ class SKUInfoFactory(InfoFactory):
         init_transit_order_min = 0
         init_transit_order_max = 1
         assert(init_transit_order_min<init_transit_order_max)
-        # init_transit_orders = [deque(randint(init_transit_order_min, init_transit_order_max, 45), maxlen=45)
-        #                     for j in range(0, n_levels)]
         init_inventory_min = 5
         init_inventory_max = 10
         init_safety_stock = n_levels*[2] 

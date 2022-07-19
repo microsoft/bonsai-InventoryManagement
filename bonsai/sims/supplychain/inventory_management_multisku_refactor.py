@@ -16,18 +16,18 @@ from typing import Any, Type, List
 from scipy.stats import *
 import numpy as np
 import gym
-from or_gym.utils import assign_env_config
-from or_gym.utils import make_lead_profile
+from utils import assign_env_config
+from utils import make_lead_profile
 from collections import deque
-from or_gym.envs.supply_chain.multi_sku import SKUInfoFactory
-from or_gym.envs.supply_chain.chain_definition import SupplyChainTopography
+from multi_sku import SKUInfoFactory
+from chain_definition import SupplyChainTopology
 
 
 class InvManagementMultiSKUMasterEnv(gym.Env):
     '''
-    The supply chain environment is structured as follows:
+    The supply chain environment is structured based on or-gym paper [https://arxiv.org/abs/2008.06319] as found in the quote below. 
 
-    It is a multi-period multi-echelon multi-sku production-inventory system for non-perishable products that is sold only
+    "It is a multi-period multi-echelon production-inventory system for non-perishable products that is sold only
     in discrete quantities. Each stage in the supply chain consists of an inventory holding area and a production area.
     The exception are the first stage (retailer: only inventory area) and the last stage (raw material transformation
     plant: only production area, with unlimited raw material availability). The inventory holding area holds the inventory
@@ -49,7 +49,15 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
         a) Hint: you may extend the sim for backlog
             Unfulfilled sales and replenishment orders are backlogged at a penalty.
             Note: Backlogged sales take priority in the following period
-    5) Surpluss inventory is held at each stage at a holding cost.
+    5) Surpluss inventory is held at each stage at a holding cost."
+
+    The following properties are added to the simulator:
+    6) Multiple SKUs is accepted by the simulator through multisku object with 
+        a) Custom demand profile for each SKU with the following properties being parametrized 
+            - non-stationary 
+            - noisy
+            - uncertain 
+        b) different lead profile for each sku          
     '''
 
     def __init__(self, skus: SKUInfoFactory = SKUInfoFactory(sku_count=10), *args, **kwargs):
@@ -62,7 +70,6 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
         self.num_stages = skus.n_levels + 1
         self.periods = 365
         self.supply_capacity = skus.constraints.supply_capacity
-        # need to replace self.I0 with self.I0 = [[I_s0],[I_s1],[I_s2], [I_s3], ...]
 
         self._rearrange_sku_data()
 
@@ -362,7 +369,7 @@ class InvManagementLostSalesMultiSKUEnv(InvManagementMultiSKUMasterEnv):
 if __name__ == "__main__":
     n_sku = 5
     n_levels = 3
-    my_chain = SupplyChainTopography(number_of_stages=n_levels+1)
+    my_chain = SupplyChainTopology(number_of_stages=n_levels+1)
     my_config = {'offset': 40}
     skus = SKUInfoFactory(
         sku_count=n_sku, topography=my_chain, config=my_config)

@@ -4,17 +4,17 @@ type declaration for constraints
 """
 from dataclasses import dataclass, field, asdict, replace
 from typing import Union, List, Deque, Dict
-from or_gym.envs.supply_chain.chain_definition import SupplyChainTopography
+from chain_definition import SupplyChainTopology
 
 
 def default_factory_inventory_capacity():
-    sc = SupplyChainTopography()
+    sc = SupplyChainTopology()
     n_levels = sc.number_of_stages - 1  # last stage has infinite supply and capacity
     return n_levels*[200]
 
 
 def default_factory_supply_capacity():
-    sc = SupplyChainTopography()
+    sc = SupplyChainTopology()
     n_levels = sc.number_of_stages - 1  # last stage has infinite supply and capacity
     # [100, 90, 80, etc ..]
     return [(100-10*i) for i in range(n_levels)]
