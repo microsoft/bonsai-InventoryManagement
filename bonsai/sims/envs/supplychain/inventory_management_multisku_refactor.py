@@ -1,7 +1,7 @@
 '''
 __author__: Hossein Khadivi Heris @microsoft 
 
-Some parts of the code are used from 
+Some parts of the code are inspired by and used from  
 or-gym library by the following authors
 Hector Perez, Christian Hubbs, Owais Sarwar
 4/14/2020
@@ -45,12 +45,11 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
         after the stage's respective lead time.
     2) Customer demand occurs at stage 0 (retailer). It is sampled from a specified discrete probability distribution.
     3) Demand is filled according to available inventory at stage 0.
-    4) Option: one of the following occurs,
-        a) Unfulfilled sales and replenishment orders are backlogged at a penalty.
-            Note: Backlogged sales take priority in the following period.
-        b) Unfulfilled sales and replenishment orders are lost with a goodwill loss penalty.
+    4) Unfulfilled sales and replenishment orders are lost with a goodwill loss penalty.
+        a) Hint: you may extend the sim for backlog
+            Unfulfilled sales and replenishment orders are backlogged at a penalty.
+            Note: Backlogged sales take priority in the following period
     5) Surpluss inventory is held at each stage at a holding cost.
-
     '''
 
     def __init__(self, skus: SKUInfoFactory = SKUInfoFactory(sku_count=10), *args, **kwargs):
@@ -66,7 +65,6 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
         # need to replace self.I0 with self.I0 = [[I_s0],[I_s1],[I_s2], [I_s3], ...]
 
         self._rearrange_sku_data()
-        self._extend_price()
 
         self.total_sku_constraint = True  # applicable to multi-sku
 
@@ -130,22 +128,15 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
         self.unit_costs = np.array(self.unit_costs)
         self.holding_costs = np.array(self.holding_costs)
         self.missed_sale_cost = np.array(self.missed_sale_cost)
-        self.user_D = np.array(self.user_demand)  # np.zeros(self.periods)
+        self.user_D = np.array(self.user_demand)
         # reduced tracking all the transit order above day 14 are squeeze into day 15.
         self.transit_order_tracking_days = 15
         # total tracking of the transit orders in days. Usually 30 days is sufficient for leads below 10 days
         self.max_transit_order_tracking_days = 30
         # transit orders kept up to max_transit_order_tracking days
-        # the very last stage has infinite raw material
         self.state_in_transit = np.zeros(
             (self.n_sku, self.num_stages-1, self.max_transit_order_tracking_days))  # [45*[0]]
         self.lead_profiles = np.array(self.lead_profiles)
-
-    def _extend_price(self):
-        '''
-        This is a helper function to extend the sku price/cost to inner levels of the supply chain. 
-        Currently, SKU object provides pricing for the retail level
-        '''
 
     def seed(self, seed=None):
         '''
@@ -157,16 +148,7 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
 
     def _RESET(self):
         '''
-        Create and initialize all variables and containers.
-        Nomenclature:
-            I = On hand inventory at the start of each period at each stage (except last one).
-            T = Pipeline inventory at the start of each period at each stage (except last one).
-            R = Replenishment order placed at each period at each stage (except last one).
-            D = Customer demand at each period (at the retailer)
-            S = Sales performed at each period at each stage.
-            B = Backlog at each period at each stage.
-            LS = Lost sales at each period at each stage.
-            P = Total profit at each stage.
+        Create variables and initialize numpy variables for matrix calculations  
         '''
         periods = self.num_periods
         m = self.num_stages
@@ -205,7 +187,6 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
         t = self.period
         lt_max = self.transit_order_tracking_days
         state = np.zeros((self.n_sku, (lt_max + 1), m))
-        # state = np.zeros(m)
 
         if t == 0:
             state[:, 0, :] = self.initial_inventory
@@ -228,7 +209,7 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
 
     def _STEP(self, action: List[List[int]]) -> Any:
         '''
-        Take a step in time in the multi-period inventory management problem.
+        Take a step in time in the multi-period multi skus inventory management problem.
         action shape = (sku, levels) number of units to request from suppliers (last stage makes no requests)
         [orders_sku0 [10,20,30], orders_sku1[30, 20,10]]
         '''
@@ -366,11 +347,6 @@ class InvManagementMultiSKUMasterEnv(gym.Env):
 
     def reset(self):
         return self._RESET()
-
-
-class InvManagementBacklogMultiSKUEnv(InvManagementMultiSKUMasterEnv):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 
 class InvManagementLostSalesMultiSKUEnv(InvManagementMultiSKUMasterEnv):
