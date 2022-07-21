@@ -35,11 +35,16 @@ The below image summarizes the approach:
 <img src = "img/SolutionArchitecture.png" alt= "drawing" width="500"/>
 
 ### Objective
-Minimize overall cost, i.e. cost of missing demand + cost of holding.
+Minimize cost of missing demand + cost of holding for each single product. 
+
 
 |                    | Defintion  | Notes |
 | -------------------| -----------|-------|
-|Observations        |state_list: composed of 33 states. | inventory levels at three levels of this multi-echelon problem +  10 previous actions|
-|Actions | Order level for the 3 stages, all the stages except raw material that is inf|
-|Control frequency| Monthly | 
-|Episode Configuration| demand_distribution_profile| 1: poisson distribution 2: binomial distribution 3: uniform random integer 4: geometric distribution 5: user supplied demand values|
+|Observations        |transit orders, demand_forecast, demand_sigma, current_demand, inventory, leads, misses_sale_to_inventory_cost_ratio|demand_sigma: standard deviation of the forecasts|
+|Actions | safety stock levels for each stage|
+|Control frequency| user defined | retailor can decide on time interval of adjusting the future expected safety stock levels  
+|Episode Configuration| demand profile parameters, sigmax, offset, amp1, ph1, amp2, ph2, randvar, lead profile, missed_sale_to_inventory_cost, action frequency | custom demand is parameterized to manage demand properties such as (1) sigmax: max uncertainty threshold (2)offset: offsets demand levels, amp1,ph1, amp2, ph2: non-stationarity, randvar: baseline demand noise. Various lead profiles are available for more complex situations such as variable lead times, etc|
+
+An example demand profile consumed by the simulator is shown below showing actual and forecasted demand. Note seasonality, noise, and forecast uncertainty. 
+
+<img src = "img/CustomDemand.png" alt= "drawing" width="500"/>
