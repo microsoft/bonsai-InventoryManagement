@@ -1,7 +1,7 @@
 from random import randint
 from tkinter import N
-from or_gym.envs.supply_chain.multi_sku import *
-from or_gym.envs.supply_chain.chain_definition import SupplyChainTopology
+from supplychain.multi_sku import *
+from supplychain.chain_definition import SupplyChainTopology
 import pytest
 
 
@@ -28,7 +28,7 @@ def test_sku_price_dimension() -> None:
     n_stages = [4, 5]
     for n_stage in n_stages:
         chain = SupplyChainTopology(number_of_stages=n_stage)
-        skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+        skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
         assert len(skus.info.generic[0].unit_cost) == n_stage
 
 
@@ -37,7 +37,7 @@ def test_sku_inventory_dimension() -> None:
     n_stages = [4, 5]
     for n_stage in n_stages:
         chain = SupplyChainTopology(number_of_stages=n_stage)
-        skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+        skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
         assert len(skus.info.dynamic[0].inventory) == n_stage-1
 
 
@@ -46,7 +46,7 @@ def test_sku_lead_profile_dimension() -> None:
     n_stages = [4, 5]
     for n_stage in n_stages:
         chain = SupplyChainTopology(number_of_stages=n_stage)
-        skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+        skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
         assert len(skus.info.dynamic[0].lead_profile) == n_stage-1
 
 
@@ -59,7 +59,7 @@ def test_sku_demand_profile() -> None:
     n_stages = [5]
     for n_stage in n_stages:
         chain = SupplyChainTopology(number_of_stages=n_stage)
-        skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+        skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
         assert (skus.info.dynamic[0].demand_info.demand_actual[0] != skus.info.dynamic[1].demand_info.demand_actual[0])\
             or skus.info.dynamic[0].demand_info.demand_actual[0] != skus.info.dynamic[2].demand_info.demand_actual[0]
 
@@ -69,7 +69,7 @@ def test_constraint_shape1() -> None:
     n_stages = [4, 5]
     for n_stage in n_stages:
         chain = SupplyChainTopology(number_of_stages=n_stage)
-        skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+        skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
         assert len(skus.constraints.inventory_capacity) == n_stage-1
 
 
@@ -78,7 +78,7 @@ def test_constraint_shape2() -> None:
     n_stages = [4, 5]
     for n_stage in n_stages:
         chain = SupplyChainTopology(number_of_stages=n_stage)
-        skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+        skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
         assert len(skus.constraints.supply_capacity) == n_stage-1
 
 
@@ -86,7 +86,7 @@ def test_demand_forecast_property() -> None:
     n_sku = 10
     n_stages = 4
     chain = SupplyChainTopology(number_of_stages=n_stages)
-    skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+    skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
     for s in range(skus.sku_count):
         skus.info.dynamic[s].period = 0
         forecast_iteration0 = skus.info.dynamic[s].iteration_demand_forecast
@@ -104,7 +104,7 @@ def test_transit_order_update() -> None:
     n_sku = 5
     n_stages = 4
     chain = SupplyChainTopology(number_of_stages=n_stages)
-    skus = SKUInfoFactory(sku_count=n_sku, topography=chain)
+    skus = SKUInfoFactory(sku_count=n_sku, topology=chain)
     actions = [[8, 17, 0],
                [8, 23, 23],
                [8, 23, 23],

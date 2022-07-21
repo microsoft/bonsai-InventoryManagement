@@ -11,8 +11,8 @@ Note: Only supported for fixed lead time
 
 
 from typing import Type
-from or_gym.utils import calc_runtime
-from or_gym.envs.supply_chain.multi_sku import SupplyChainTopology
+from utils import calc_runtime
+from multi_sku import SupplyChainTopology
 from distutils.command.config import config
 import time as t
 from mip import Model, xsum, minimize, BINARY, INTEGER, CONTINUOUS
@@ -21,7 +21,7 @@ from sys import stdout as out
 from tkinter.tix import INTEGER
 from tabulate import tabulate
 import numpy as np
-from supply_chain.multi_sku import SKUInfoFactory
+from multi_sku import SKUInfoFactory
 class MipSolver:
     def __init__(self, config):
         pass

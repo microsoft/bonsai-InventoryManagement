@@ -372,7 +372,7 @@ if __name__ == "__main__":
     my_chain = SupplyChainTopology(number_of_stages=n_levels+1)
     my_config = {'offset': 40}
     skus = SKUInfoFactory(
-        sku_count=n_sku, topography=my_chain, config=my_config)
+        sku_count=n_sku, topology=my_chain, config=my_config)
     env = InvManagementLostSalesMultiSKUEnv(skus=skus)
     output = env.reset()
     rand_act = np.random.randint(1, 100, (n_sku, n_levels))

@@ -28,4 +28,4 @@ RUN pip3 install -e .
 WORKDIR /src
 
 # This will be the command to run the sim
-CMD ["python3", "main.py"]
+CMD ["python3", "main_train.py"]
