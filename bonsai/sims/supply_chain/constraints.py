@@ -4,7 +4,7 @@ type declaration for constraints
 """
 from dataclasses import dataclass, field, asdict, replace
 from typing import Union, List, Deque, Dict
-from chain_definition import SupplyChainTopology
+from .chain_definition import SupplyChainTopology
 
 
 def default_factory_inventory_capacity():

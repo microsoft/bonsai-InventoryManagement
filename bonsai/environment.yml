@@ -18,3 +18,4 @@ dependencies:
     - gym==0.17.1
     - jupyterlab
     - mip
+    - matplotlib

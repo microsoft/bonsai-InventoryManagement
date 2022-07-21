@@ -11,11 +11,11 @@ import string
 import numpy as np
 from typing import Union, List, Deque, Dict, Type
 from collections import deque
-from utils_demand import gen_custom_demand
 from numpy.random import randint
-from constraints import MultiSKUConstraints
-from chain_definition import SupplyChainTopology
-from utils import make_lead_profile
+from .constraints import MultiSKUConstraints
+from .chain_definition import SupplyChainTopology
+from .utils import make_lead_profile
+from .utils_demand import gen_custom_demand
 
 '''
 Follows a factory design pattern to create large number of skus with defined properties. 

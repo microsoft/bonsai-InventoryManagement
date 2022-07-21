@@ -13,14 +13,14 @@ Hector Perez, Christian Hubbs, Owais Sarwar
 from ast import Raise
 import itertools
 from typing import Any, Type, List
+from collections import deque
 from scipy.stats import *
 import numpy as np
 import gym
-from utils import assign_env_config
-from utils import make_lead_profile
-from collections import deque
-from multi_sku import SKUInfoFactory
-from chain_definition import SupplyChainTopology
+from .multi_sku import SKUInfoFactory
+from .chain_definition import SupplyChainTopology
+from .utils import assign_env_config
+from .utils import make_lead_profile
 
 
 class InvManagementMultiSKUMasterEnv(gym.Env):

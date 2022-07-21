@@ -34,25 +34,28 @@ from microsoft_bonsai_api.simulator.generated.models import (
 )
 from azure.core.exceptions import HttpResponseError
 import argparse
-import or_gym
 import numpy as np
 from send2trash import TrashPermissionError
 from policies import random_policy, brain_policy, forget_memory, safety_policy, zero_policy, random_safety_policy
 import pdb
-from or_gym.envs.supply_chain.multi_sku import SKUInfoFactory
-from or_gym.envs.supply_chain.chain_definition import SupplyChainTopography
-from or_gym.envs.supply_chain.inventory_management_multisku_refactor import InvManagementLostSalesMultiSKUEnv
-from or_gym.solvers.mip_solver_multi_sku import MipSolver
+from sims.supply_chain.multi_sku import SKUInfoFactory
+from sims.supply_chain.chain_definition import SupplyChainTopology
+from sims.supply_chain.inventory_management import InvManagementLostSalesMultiSKUEnv
+from sims.supply_chain.mip_solver import MipSolver
 
-def make_multi_sku_env(config:dict= {'number_of_stages':4, 'number_of_sku':1})->InvManagementLostSalesMultiSKUEnv:
+
+def make_multi_sku_env(config: dict = {'number_of_stages': 4, 'number_of_sku': 1}) -> InvManagementLostSalesMultiSKUEnv:
     '''
     Input: number of skus and stages in multi-echelon inventory management 
     Output: multisku simulation environment 
     Note: skus are built using sku info factory
     '''
-    my_chain = SupplyChainTopography(number_of_stages = config["number_of_stages"])
-    skus = SKUInfoFactory(sku_count = config["number_of_sku"], topography = my_chain, config = config)
-    return InvManagementLostSalesMultiSKUEnv(skus) 
+    my_chain = SupplyChainTopology(
+        number_of_stages=config["number_of_stages"])
+    skus = SKUInfoFactory(
+        sku_count=config["number_of_sku"], topology=my_chain, config=config)
+    return InvManagementLostSalesMultiSKUEnv(skus)
+
 
 LOG_PATH = "logs"
 
@@ -87,8 +90,8 @@ class TemplateSimulatorSession:
         #self.state = self.simulator.reset().tolist()
         self.sim_reward = 0
         self.iter_count = 0
-        self.sum_cost_action_freq = 0 
-        self.constraint_relaxation = 0 
+        self.sum_cost_action_freq = 0
+        self.constraint_relaxation = 0
         self.mip_cost_config = "Safety"
         self.missed_sale_to_inventory_cost_ratio = 10
         self.sim_terminal = False
@@ -107,32 +110,43 @@ class TemplateSimulatorSession:
 
         transit_orders = []
         for level in range(self.simulator.skus.n_levels):
-            transit_orders.append(list(self.simulator.skus.info.dynamic[0].transit_order[level])[0:15])
-        transit_orders  = [item for sublist in transit_orders for item in sublist]   
-        # make sure this matches that of platform 
-        self.simulator.skus.info.dynamic[0].forecast_window = 15 
+            transit_orders.append(
+                list(self.simulator.skus.info.dynamic[0].transit_order[level])[0:15])
+        transit_orders = [
+            item for sublist in transit_orders for item in sublist]
+        # make sure this matches that of platform
+        self.simulator.skus.info.dynamic[0].forecast_window = 15
         sim_state = {}
         sim_state['transit_orders'] = [int(order) for order in transit_orders]
-        sim_state['demand_actual'] = int(self.simulator.skus.info.dynamic[0].iteration_actual_demand) #    ["demand_actual"][sim.simulator.period].tolist()
-        sim_state['demand_forecast']  = [int(i) for i in self.simulator.skus.info.dynamic[0].iteration_demand_forecast] # ["demand_forecast"][sim.simulator.period+1:sim.simulator.period+11].tolist()   
-        sim_state['demand_sigma']  = [int(i) for i in self.simulator.skus.info.dynamic[0].iteration_forecast_sigma] # [sim.simulator.period+1:sim.simulator.period+11].tolist()   
-        sim_state["inventory"] = [int(i) for i in self.simulator.skus.info.dynamic[0].inventory]
-        sim_state['leads'] = [int(i) for i in self.simulator.skus.info.dynamic[0].leads]
+        # ["demand_actual"][sim.simulator.period].tolist()
+        sim_state['demand_actual'] = int(
+            self.simulator.skus.info.dynamic[0].iteration_actual_demand)
+        # ["demand_forecast"][sim.simulator.period+1:sim.simulator.period+11].tolist()
+        sim_state['demand_forecast'] = [
+            int(i) for i in self.simulator.skus.info.dynamic[0].iteration_demand_forecast]
+        # [sim.simulator.period+1:sim.simulator.period+11].tolist()
+        sim_state['demand_sigma'] = [
+            int(i) for i in self.simulator.skus.info.dynamic[0].iteration_forecast_sigma]
+        sim_state["inventory"] = [
+            int(i) for i in self.simulator.skus.info.dynamic[0].inventory]
+        sim_state['leads'] = [
+            int(i) for i in self.simulator.skus.info.dynamic[0].leads]
         sim_state["constraint_relaxation"] = int(self.constraint_relaxation)
-        sim_state["mip_solver_status"] = self.mip_cost_config 
-        sim_state["sim_reward"] = float(self.sum_cost_action_freq)        
-        sim_state["missed_sale_to_inventory_cost_ratio"] = float(self.missed_sale_to_inventory_cost_ratio)
+        sim_state["mip_solver_status"] = self.mip_cost_config
+        sim_state["sim_reward"] = float(self.sum_cost_action_freq)
+        sim_state["missed_sale_to_inventory_cost_ratio"] = float(
+            self.missed_sale_to_inventory_cost_ratio)
         print("sim_state:\n", sim_state)
         return sim_state
 
     def episode_start(self, config: Dict[str, Any]):
         """ Called at the start of each episode """
-        self.constraint_coupling = bool(0) 
-        config["number_of_sku"]  = 1 
+        self.constraint_coupling = bool(0)
+        config["number_of_sku"] = 1
         config["number_of_stages"] = 4
-        self.simulator = make_multi_sku_env(config = config)
-        self.mip_solver = MipSolver(config = None)
-        self.sum_cost_action_freq = 0 
+        self.simulator = make_multi_sku_env(config=config)
+        self.mip_solver = MipSolver(config=None)
+        self.sum_cost_action_freq = 0
         self.action_frequency = config["action_frequency"]
         self.brain_action_previous = self.simulator.skus.n_levels*[0]
         self.missed_sale_to_inventory_cost_ratio = config["missed_sale_to_inventory_cost_ratio"]
@@ -144,50 +158,55 @@ class TemplateSimulatorSession:
         brain_action = [action["safety_stock_stage0"],
                         action["safety_stock_stage1"],
                         action["safety_stock_stage2"]]
-        if self.simulator.period%self.action_frequency == 0:
+        if self.simulator.period % self.action_frequency == 0:
             print('using brain action:', self.iter_count)
             pass
         else:
             print('using previous action', self.simulator.period)
             brain_action = self.brain_action_previous
-            print(f'brain action {brain_action}')  
-        self.sum_cost_action_freq = 0   
+            print(f'brain action {brain_action}')
+        self.sum_cost_action_freq = 0
         for i in range(0, self.action_frequency):
-            self.previous_safety = brain_action 
-            self.simulator.skus.info.dynamic[0].safety = brain_action               
+            self.previous_safety = brain_action
+            self.simulator.skus.info.dynamic[0].safety = brain_action
             skus = self.simulator.skus
             self.mip_cost_config = "Safety"
             self.constraint_relaxation = 0
-            sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku_v2(skus = skus, cost_function="Safety", constraint_coupling=self.constraint_coupling,relaxation=0)
+            sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku_v2(
+                skus=skus, cost_function="Safety", constraint_coupling=self.constraint_coupling, relaxation=0)
             if None in [item for sublist in sim_action for item in sublist]:
                 self.constraint_relaxation = 1
-                sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku_v2(skus = skus, cost_function="Safety", constraint_coupling=self.constraint_coupling,relaxation=1)
+                sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku_v2(
+                    skus=skus, cost_function="Safety", constraint_coupling=self.constraint_coupling, relaxation=1)
                 if None in [item for sublist in sim_action for item in sublist]:
                     self.constraint_relaxation = 2
-                    sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku_v2(skus = skus, cost_function="Safety", constraint_coupling=self.constraint_coupling,relaxation=2) 
-                    if None in [item for sublist in sim_action for item in sublist]: 
-                        self.mip_cost_config = "SafetyAddedHybrid"  
-                        sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku(skus = skus, cost_function="SafetyAddedHybrid", constraint_coupling=self.constraint_coupling)
-                        self.constraint_relaxation = 0 
+                    sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku_v2(
+                        skus=skus, cost_function="Safety", constraint_coupling=self.constraint_coupling, relaxation=2)
+                    if None in [item for sublist in sim_action for item in sublist]:
+                        self.mip_cost_config = "SafetyAddedHybrid"
+                        sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku(
+                            skus=skus, cost_function="SafetyAddedHybrid", constraint_coupling=self.constraint_coupling)
+                        self.constraint_relaxation = 0
                         if None in [item for sublist in sim_action for item in sublist]:
                             self.mip_cost_config = "Hybrid"
-                            sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku(skus = self.simulator.skus, cost_function="Hybrid", constraint_coupling=self.constraint_coupling)
-                            self.constraint_relaxation = 1 
+                            sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku(
+                                skus=self.simulator.skus, cost_function="Hybrid", constraint_coupling=self.constraint_coupling)
+                            self.constraint_relaxation = 1
                             if None in [item for sublist in sim_action for item in sublist]:
                                 self.mip_cost_config = "SafetyAddedHybrid"
-                                sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku(skus = skus, cost_function="SafetyAddedHybrid", constraint_coupling = 0)
-                                self.constraint_relaxation = 2 
+                                sim_action, _, _ = self.mip_solver.get_mip_action_multiple_sku(
+                                    skus=skus, cost_function="SafetyAddedHybrid", constraint_coupling=0)
+                                self.constraint_relaxation = 2
                                 if None in [item for sublist in sim_action for item in sublist]:
                                     self.mip_cost_config = "Infeasible"
-                                    self.constraint_relaxation = -1 
-                                    sim_action = self.simulator.skus.sku_count*[self.simulator.skus.n_levels*[20]]   
+                                    self.constraint_relaxation = -1
+                                    sim_action = self.simulator.skus.sku_count * \
+                                        [self.simulator.skus.n_levels*[20]]
 
-            
             self.simulator.step(sim_action)
             self.mip_action = sim_action
             self.sum_cost_action_freq += self.simulator.iteration_cost
 
-                
     def halted(self) -> bool:
         """
         Should return True if the simulator cannot continue for some reason
@@ -272,8 +291,8 @@ class TemplateSimulatorSession:
         """
 
         import pandas as pd
-        
-        log_state = state.copy() 
+
+        log_state = state.copy()
         log_action = action.copy() if action is not None else 0
         log_config = self.config.copy()
         for key, value in log_state.items():
@@ -287,7 +306,7 @@ class TemplateSimulatorSession:
         for key, value in log_config.items():
             if type(value) == list:
                 log_config[key] = str(log_config[key])
-        data = {**log_state, **log_action, **log_config} 
+        data = {**log_state, **log_action, **log_config}
         data["episode"] = episode
         data["iteration"] = iteration
         data["TimeStamp"] = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -380,7 +399,7 @@ def test_policy(
     render: bool = False,
     num_iterations: int = 200,
     log_iterations: bool = False,
-    policy = random_safety_policy,
+    policy=random_safety_policy,
     policy_name: str = "random_safety_policy",
     scenario_file: str = "assess_config.json",
 ):
@@ -411,8 +430,8 @@ def test_policy(
         sim_state = sim.get_state()
 
         print('policy name: ', policy_name)
-        if (policy_name != 'random' and policy_name != 'safety_policy' and policy_name !='zero_policy'
-        and policy_name!= 'random_safety_policy'):
+        if (policy_name != 'random' and policy_name != 'safety_policy' and policy_name != 'zero_policy'
+                and policy_name != 'random_safety_policy'):
             print('using exported brain')
 
             if any('exported_brain_url' in key for key in policy.keywords):
@@ -427,49 +446,59 @@ def test_policy(
         #iteration += 1
         print('num_iterations:', num_iterations)
         import time as tt
-        #tt.sleep(3)
+        # tt.sleep(3)
         num_iterations = 20
         while not terminal:
             action = []
             states_log = {}
-            
+
             states_log["demand_actual"] = []
             states_log["demand_sigma"] = []
-            states_log["demand_forecast"]=[]
+            states_log["demand_forecast"] = []
             states_log["states_list"] = []
             states_log["transit_orders"] = []
             states_log["leads"] = []
-            
+
             for sku in range(sim.simulator.skus.sku_count):
                 state_list = []
-                state_list.append(list(sim.simulator.current_inventory_level[sku]))
+                state_list.append(
+                    list(sim.simulator.current_inventory_level[sku]))
                 for level in range(sim.simulator.skus.n_levels):
-                    state_list.append(list(sim.simulator.skus.info.dynamic[sku].transit_order[level])[0:10])
+                    state_list.append(
+                        list(sim.simulator.skus.info.dynamic[sku].transit_order[level])[0:10])
                 print('state_list before transformation:\n', state_list)
-                state_list  = [item for sublist in state_list for item in sublist]   
+                state_list = [
+                    item for sublist in state_list for item in sublist]
                 print('state list after transform:\n', state_list)
                 # import time as tt
                 # tt.sleep(1)
                 sim_state = {}
                 sim_state['state_list'] = list(state_list)
-                sim_state['demand_actual'] = sim.simulator.skus.info.dynamic[sku].iteration_actual_demand #    ["demand_actual"][sim.simulator.period].tolist()
-                sim_state['demand_forecast']  = sim.simulator.skus.info.dynamic[sku].iteration_demand_forecast # ["demand_forecast"][sim.simulator.period+1:sim.simulator.period+11].tolist()   
-                sim_state['demand_sigma']  = sim.simulator.skus.info.dynamic[sku].iteration_forecast_sigma # [sim.simulator.period+1:sim.simulator.period+11].tolist()   
+                # ["demand_actual"][sim.simulator.period].tolist()
+                sim_state['demand_actual'] = sim.simulator.skus.info.dynamic[sku].iteration_actual_demand
+                # ["demand_forecast"][sim.simulator.period+1:sim.simulator.period+11].tolist()
+                sim_state['demand_forecast'] = sim.simulator.skus.info.dynamic[sku].iteration_demand_forecast
+                # [sim.simulator.period+1:sim.simulator.period+11].tolist()
+                sim_state['demand_sigma'] = sim.simulator.skus.info.dynamic[sku].iteration_forecast_sigma
                 states_log["states_list"].append(state_list)
-                states_log["demand_actual"].append(sim.simulator.skus.info.dynamic[sku].iteration_actual_demand)
-                states_log["demand_sigma"].append(sim.simulator.skus.info.dynamic[sku].iteration_forecast_sigma)
-                states_log["demand_forecast"].append(sim.simulator.skus.info.dynamic[sku].iteration_demand_forecast)
-                #states_log["transit_orders"].append(sim.simulator.skus.info.dynamic[sku].transit_order) 
-                states_log["leads"].append(sim.simulator.skus.info.dynamic[sku].leads)
-                
+                states_log["demand_actual"].append(
+                    sim.simulator.skus.info.dynamic[sku].iteration_actual_demand)
+                states_log["demand_sigma"].append(
+                    sim.simulator.skus.info.dynamic[sku].iteration_forecast_sigma)
+                states_log["demand_forecast"].append(
+                    sim.simulator.skus.info.dynamic[sku].iteration_demand_forecast)
+                # states_log["transit_orders"].append(sim.simulator.skus.info.dynamic[sku].transit_order)
+                states_log["leads"].append(
+                    sim.simulator.skus.info.dynamic[sku].leads)
+
                 # fix json serialization issue with numpy int32
                 for item, value in sim_state.items():
-                    #print(sim_state)
+                    # print(sim_state)
                     if type(value) == list:
-                        sim_state[item] = [int(i) for i in value]    
-                #ask someone         
-                states_log['state_list']= sim_state
-                # 
+                        sim_state[item] = [int(i) for i in value]
+                # ask someone
+                states_log['state_list'] = sim_state
+                #
                 print(sim_state)
                 sku_action = policy(sim_state)
                 print(f'sku action for sku {sku} .......>>>> :\n', sku_action)
@@ -477,33 +506,34 @@ def test_policy(
                                 sku_action["safety_stock_stage1"],
                                 sku_action["safety_stock_stage2"]]
                 action.append(brain_action)
-                #update safety 
+                # update safety
                 sim.simulator.skus.info.dynamic[sku].safety = brain_action
-            
-            #passing empty actions as sku handles safety
 
-            # po[sku] = purchase orders for all levels 
-            action ={'action': action}
+            # passing empty actions as sku handles safety
+
+            # po[sku] = purchase orders for all levels
+            action = {'action': action}
             sim.episode_step(action)
-            
+
             # add mip action to states
-             
-            states_log["mip_action"] = sim.mip_action 
+
+            states_log["mip_action"] = sim.mip_action
             states_log['iter_cost'] = sim.simulator.iteration_cost.tolist()
             states_log["inventory"] = sim.simulator.current_inventory_level.tolist()
-            states_log["missed_sale"] = sim.simulator.iteration_lost_sale.tolist()  
+            states_log["missed_sale"] = sim.simulator.iteration_lost_sale.tolist()
             states_log["replenishment"] = sim.simulator.iteration_replenishment.tolist()
-            states_log["state_in_transit"] = sim.simulator.state_in_transit.tolist()   
-            states_log["demand_all_levels"] = sim.simulator.Demand_all_levels.tolist()   
+            states_log["state_in_transit"] = sim.simulator.state_in_transit.tolist()
+            states_log["demand_all_levels"] = sim.simulator.Demand_all_levels.tolist()
             states_log["missed_sale_per_unit"] = sim.simulator.missed_sale_cost.tolist()
             states_log["hold_cost_per_unit"] = sim.simulator.holding_costs.tolist()
             states_log["inventory_constraint"] = sim.simulator.skus.constraints.inventory_capacity
             states_log["episode_sigmax"] = sim.episode_sigma
-            states_log["inventory_sum"] = np.sum(sim.simulator.current_inventory_level, axis = 0).tolist()
-            states_log["inventory_sum_plus_demand"] = (np.sum(sim.simulator.current_inventory_level, axis = 0) +\
-                                                      np.sum(sim.simulator.Demand_all_levels)).tolist()
-            states_log["constraint_relaxed"] = sim.constraint_relaxation 
-            states_log["mip_cost_config"] = sim.mip_cost_config 
+            states_log["inventory_sum"] = np.sum(
+                sim.simulator.current_inventory_level, axis=0).tolist()
+            states_log["inventory_sum_plus_demand"] = (np.sum(sim.simulator.current_inventory_level, axis=0) +
+                                                       np.sum(sim.simulator.Demand_all_levels)).tolist()
+            states_log["constraint_relaxed"] = sim.constraint_relaxation
+            states_log["mip_cost_config"] = sim.mip_cost_config
             print(states_log)
             sim_state = states_log
             if log_iterations:
@@ -587,14 +617,14 @@ def main(
     try:
         with open("interface.json") as file:
             interface = json.load(file)
-    except: 
-        interface  = {
-        "name": "IMS",
-        "timeout": 60,
-        "description": {
-            "config": {"empty":0},
-            "action": {"empty":0},
-            "state": {"empty":0}
+    except:
+        interface = {
+            "name": "IMS",
+            "timeout": 60,
+            "description": {
+                "config": {"empty": 0},
+                "action": {"empty": 0},
+                "state": {"empty": 0}
             }
         }
 
@@ -837,9 +867,9 @@ if __name__ == "__main__":
         print(f"Connecting to exported brain running at {url}...")
         trained_brain_policy = partial(brain_policy, exported_brain_url=url)
         test_policy(
-            render = args.render,
+            render=args.render,
             log_iterations=args.log_iterations,
-            policy = trained_brain_policy,
+            policy=trained_brain_policy,
             policy_name="exported",
             num_iterations=args.iteration_limit,
             scenario_file=scenario_file,

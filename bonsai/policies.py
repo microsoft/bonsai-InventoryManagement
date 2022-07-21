@@ -9,11 +9,10 @@ from typing import Dict, List, Any
 import requests
 import numpy as np
 import json
-from policy_quasi_static_dfo import *
 from typing import Optional
 
 
-def random_policy(state:Dict[str, float]):
+def random_policy(state: Dict[str, float]):
     """
     Ignore the state, move randomly.
     """
@@ -23,7 +22,9 @@ def random_policy(state:Dict[str, float]):
         "order_stage2": random.randint(15, 25)
     }
     return action
-def zero_policy(state:Dict[str, float]):
+
+
+def zero_policy(state: Dict[str, float]):
     """
     Ignore the state, move randomly.
     """
@@ -34,18 +35,20 @@ def zero_policy(state:Dict[str, float]):
     }
     return action
 
-def random_safety_policy(state:Dict[str, float]):
+
+def random_safety_policy(state: Dict[str, float]):
     """
     Ignore the state, move randomly.
     """
     action = {
-        "safety_stock_stage0": random.randint(0,10),
-        "safety_stock_stage1": random.randint(0,10),
-        "safety_stock_stage2": random.randint(0,10)
+        "safety_stock_stage0": random.randint(0, 10),
+        "safety_stock_stage1": random.randint(0, 10),
+        "safety_stock_stage2": random.randint(0, 10)
     }
     return action
 
-def heuristic_policy(state:Dict[str, float]):
+
+def heuristic_policy(state: Dict[str, float]):
     """
     Ignore the state, move randomly.
     """
@@ -63,37 +66,36 @@ def brain_policy_old(
 
     prediction_endpoint = f"{exported_brain_url}/v1/prediction"
     response = requests.get(prediction_endpoint, json=state)
-    
+
     return response.json()
 
+
 def brain_policy(state: Dict[str, Any], exported_brain_url: str = "http://localhost:5000"
-):
+                 ):
     predictionPath = "/v1/prediction"
     headers = {
-    "Content-Type": "application/json"
+        "Content-Type": "application/json"
     }
     endpoint = exported_brain_url + predictionPath
 
     requestBody = {
 
         'transit_orders': [int(i) for i in state['transit_orders']],
-        'demand_actual': int(state['demand_actual']), 
-        'demand_forecast':[int(i) for i in state['demand_forecast']],
+        'demand_actual': int(state['demand_actual']),
+        'demand_forecast': [int(i) for i in state['demand_forecast']],
         'demand_sigma': [int(i) for i in state['demand_sigma']],
         'inventory': [int(i) for i in state['inventory']],
         'leads': [int(i) for i in state['leads']],
         'missed_sale_to_inventory_cost_ratio': int(state['missed_sale_to_inventory_cost_ratio'])
     }
     print('request body:', requestBody)
-   
+
     response = requests.post(
-            endpoint,
-            data = json.dumps(requestBody),
-            headers = headers
-          )
-    return response.json() 
-    
-    
+        endpoint,
+        data=json.dumps(requestBody),
+        headers=headers
+    )
+    return response.json()
 
 
 def forget_memory(
@@ -125,26 +127,3 @@ def safety_policy(state: Dict[str, float]):
         "safety_stock_stage2": int(1 + np.sqrt(np.mean(demand_sigma[4:10]))),
     }
     return action
-
-def quasi_static_dfo_policy(state, simulator, iteration, old_policy = None):
-    
-    # update frequency 
-    update = 10
-    if iteration%update ==0:
-        print(f're-running quasi static optimization at iter {iteration}')
-        env2 = copy.deepcopy(simulator)
-        new_policy, out = optimize_inventory_policy('InvManagement-v1',dfo_func, env2, init_policy=old_policy, method='Powell')
-        print("I for env2:{}".format(env2.I))
-        action = base_stock_policy(new_policy, simulator)
-    else:
-        print(f're-using previous optimization at iter {iteration}')
-        action = base_stock_policy(old_policy, simulator)
-        new_policy = old_policy
-    policy_action = {
-    "order_stage0": action[0],
-    "order_stage1": action[1],
-    "order_stage2": action[2]
-    }
-    return policy_action, new_policy
-    
-    

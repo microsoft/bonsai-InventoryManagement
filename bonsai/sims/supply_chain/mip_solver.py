@@ -11,8 +11,6 @@ Note: Only supported for fixed lead time
 
 
 from typing import Type
-from utils import calc_runtime
-from multi_sku import SupplyChainTopology
 from distutils.command.config import config
 import time as t
 from mip import Model, xsum, minimize, BINARY, INTEGER, CONTINUOUS
@@ -21,7 +19,9 @@ from sys import stdout as out
 from tkinter.tix import INTEGER
 from tabulate import tabulate
 import numpy as np
-from multi_sku import SKUInfoFactory
+from .multi_sku import SupplyChainTopology
+from .multi_sku import SKUInfoFactory
+from .utils import calc_runtime
 class MipSolver:
     def __init__(self, config):
         pass
