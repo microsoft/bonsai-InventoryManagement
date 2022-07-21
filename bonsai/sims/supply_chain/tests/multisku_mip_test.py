@@ -1,7 +1,7 @@
 import random
-from supplychain.multi_sku import SKUInfoFactory
-from supplychain.multi_sku import SupplyChainTopology
-from supplychain.mip_solver import MipSolver
+from supply_chain.multi_sku import SKUInfoFactory
+from supply_chain.multi_sku import SupplyChainTopology
+from supply_chain.mip_solver import MipSolver
 import pytest
 from collections import deque
 

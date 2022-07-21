@@ -1,9 +1,9 @@
 '''
 Set of tests to make sure multi_sku sim works as intended 
 '''
-from supplychain.inventory_management import InvManagementLostSalesMultiSKUEnv
-from supplychain.multi_sku import SKUInfoFactory
-from supplychain.chain_definition import SupplyChainTopography
+from supply_chain.inventory_management import InvManagementLostSalesMultiSKUEnv
+from supply_chain.multi_sku import SKUInfoFactory
+from supply_chain.chain_definition import SupplyChainTopology
 import pytest
 import random
 import numpy as np
@@ -13,8 +13,8 @@ import numpy as np
 def SKUS() -> SKUInfoFactory:
     n_sku = random.randint(2, 300)
     n_stages = random.randint(3, 7)
-    chain = SupplyChainTopography(number_of_stages=n_stages)
-    return SKUInfoFactory(sku_count=n_sku, topography=chain)
+    chain = SupplyChainTopology(number_of_stages=n_stages)
+    return SKUInfoFactory(sku_count=n_sku, topology=chain)
 
 
 def test_end_to_end_episode(SKUS: SKUInfoFactory) -> None:

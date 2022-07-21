@@ -1,7 +1,7 @@
 from random import randint
 from tkinter import N
-from supplychain.multi_sku import *
-from supplychain.chain_definition import SupplyChainTopology
+from supply_chain.multi_sku import *
+from supply_chain.chain_definition import SupplyChainTopology
 import pytest
 
 
