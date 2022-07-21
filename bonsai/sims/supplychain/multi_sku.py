@@ -13,13 +13,13 @@ from typing import Union, List, Deque, Dict, Type
 from collections import deque
 from utils_demand import gen_custom_demand
 from numpy.random import randint
-from multi_sku_constraints import MultiSKUConstraints
+from constraints import MultiSKUConstraints
 from chain_definition import SupplyChainTopology
 from utils import make_lead_profile
-'''
-Follows a factory design pattern to create different skus 
-'''
 
+'''
+Follows a factory design pattern to create large number of skus with defined properties. 
+'''
 
 def generate_name() -> str:
     return "".join(random.choices(string.ascii_uppercase, k=12))
@@ -153,14 +153,14 @@ class SKUInfoFactory(InfoFactory):
     sku_count: int = 10
     n_levels: int = 3
     info = SKUsCollection(generic={}, dynamic ={})
-    def __init__(self, sku_count: int = 10, topography: SupplyChainTopology = SupplyChainTopology(), config: dict = {}):
+    def __init__(self, sku_count: int = 10, topology: SupplyChainTopology = SupplyChainTopology(), config: dict = {}):
         self.sku_count = sku_count
-        self.n_levels = (topography.number_of_stages-1) # last stage has infinite supply for dynamic property 
+        self.n_levels = (topology.number_of_stages-1) # last stage has infinite supply for dynamic property 
         try:
             cost_ratio = config["missed_sale_to_inventory_cost_ratio"]
         except:
             cost_ratio = 100 # default 
-        generate_random_sku_info_as_json(n_skus = sku_count, n_stages = topography.number_of_stages, ratio = cost_ratio)
+        generate_random_sku_info_as_json(n_skus = sku_count, n_stages = topology.number_of_stages, ratio = cost_ratio)
         self.sku_info = load_sku_info(filename = 'sku_properties.json')
         self._prepare_generic_info()
         self._prepare_dynamic_info(n_levels=self.n_levels, config = config)
@@ -321,14 +321,14 @@ class SKUInfoFactoryRandom(InfoFactory):
     sku_count: int = 10
     n_levels: int = 3
     info = SKUsCollection(generic={}, dynamic ={})
-    def __init__(self, sku_count: int = 10, topography: SupplyChainTopography = SupplyChainTopography(), config: dict = {}):
+    def __init__(self, sku_count: int = 10, topology: SupplyChainTopology = SupplyChainTopology(), config: dict = {}):
         self.sku_count = sku_count
-        self.n_levels = (topography.number_of_stages-1) # last stage has infinite supply for dynamic property 
+        self.n_levels = (topology.number_of_stages-1) # last stage has infinite supply for dynamic property 
         try:
             cost_ratio = config["missed_sale_to_inventory_cost_ratio"]
         except:
             cost_ratio = 100 # default 
-        generate_random_sku_info_as_json2(n_skus = sku_count, n_stages = topography.number_of_stages)
+        generate_random_sku_info_as_json2(n_skus = sku_count, n_stages = topology.number_of_stages)
         self.sku_info = load_sku_info(filename = 'sku_properties.json')
         self._prepare_generic_info()
         self._prepare_dynamic_info(n_levels=self.n_levels, config = config)
