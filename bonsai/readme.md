@@ -28,11 +28,11 @@ we propose a hybrid approach due to the following reasons:
 (1) 100s of products with constraints leads to curse of dimensionality where AI only solutions becomes cumbersome if not practically impossible to train. 
 (2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in an time efficient way. Searching optimal solution may take very long time.
 
-As an alternative, we will use brain as a defuzzifier that makes a crisp decision on ideal safety stock levels for each product. We train brain for products with different missed sale to inventory holding cost ratio (e.g. 10, 100, 1000). 
+As an alternative, we will use brain as a de-fuzzifier that makes a crisp decision on ideal safety stock levels for each product without considering any cross-product constraints. We train brain for products with different missed sale to inventory holding cost ratio (e.g. 10, 100, 1000). Once brains are trained, we will loop over the products with different cost ratio and use mip solver to make final adjustments on the purchase order levels.  
 
+The below image summarizes the approach:
 
-we will use the following design architecture, where we will train a brain for 
-
+<img src = "img/SolutionArchitecture.png" alt= "drawing" width="500"/>
 
 ### Objective
 Minimize overall cost, i.e. cost of missing demand + cost of holding.
