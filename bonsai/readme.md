@@ -48,3 +48,28 @@ Minimize cost of missing demand + cost of holding for each single product.
 An example demand profile consumed by the simulator is shown below showing actual and forecasted demand. Note seasonality, noise, and forecast uncertainty. 
 
 <img src = "img/CustomDemand.png" alt= "drawing" width="500"/>
+
+### Sim packages (RL plus mip)
+
+To build bonsai sim package, login using azure-cli and then run the following command.
+
+```
+az acr build --image IMAGENAME --file Dockerfile_mipPlusBrain --registry YOURBONSAIREGISTRY .
+```
+
+### Brain training
+
+Use the following inkling file in bonsai platform to train brain that handles a single sku with wide range of missed sale to inventory cost ratio. You may also chose a separate brain for a specific missed sale to inventory cost ratio. 
+
+```
+MachineTeacher_Tutorial
+```
+
+### Assessment logs
+
+To create assessment logs for multi-sku mip plus brain approach:
+```
+```
+To create assessment logs for multi-sku mip only approach:
+```
+```
