@@ -67,9 +67,16 @@ MachineTeacher_Tutorial
 
 ### Assessment logs
 
-To create assessment logs for multi-sku mip plus brain approach:
+To create assessment logs for 
+
+(1) multi-sku mip plus brain approach:
+first export trained brain and then run
 ```
+python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported 
+--log-iterations
 ```
-To create assessment logs for multi-sku mip only approach:
+(2) multisku mip only approach:
+run the following command 
 ```
+python main_assess_mip_only.py --test-local --log-iterations 
 ```
