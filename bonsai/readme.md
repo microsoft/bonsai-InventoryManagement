@@ -47,7 +47,7 @@ Minimize cost of missing demand + cost of holding for each single product.
 
 An example demand profile consumed by the simulator is shown below showing actual and forecasted demand. Note seasonality, noise, and forecast uncertainty. 
 
-<img src = "img/CustomDemand.png" alt= "drawing" width="500"/>
+<img src = "img/CustomDemand.png" alt= "drawing" width="800"/>
 
 ### Sim packages (RL plus mip)
 
@@ -85,9 +85,8 @@ Take note of "assess_config.json" for details of the experiment, such as number 
 ## Results and Analysis
 ### brain training results on single sku:
 We studied the effects of demand forecast uncertainty and ratio of missed sale cost to inventory holding (cost ratio). Conservatively, we trained different brains for different cost ratio. A sample brain training graph is shown below.
-
-<img src = "img/Brain_trained_cost_ratio10.png" alt= "drawing" width="1000"/>
+<img src = "img/Brain_trained_cost_ratio10.png" alt= "drawing" width="800"/>
 
 The image below shows total cost vs level of uncertainty for different cost ratios. Brain plus mip outperforms classical optimizer when cost ratio is higher. This makes sense as higher missed sales cost accentuates the need for safety stock levels. When cost ratio is equal to one, there is no need to hold safety stock level as holding extra inventory is as costly as missing the sale.
 
-<img src = "img/SingleSKU_cost_ratio.png" alt= "drawing" width="1000"/>
+<img src = "img/SingleSKU_cost_ratio.png" alt= "drawing" width="800"/>
