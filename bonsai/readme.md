@@ -75,8 +75,16 @@ first export trained brain and then run
 python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported 
 --log-iterations
 ```
-(2) multisku mip only approach:
+(2) multi-sku mip only approach:
 run the following command 
 ```
 python main_assess_mip_only.py --test-local --log-iterations 
 ```
+Take note of "assess_config.json" for details of the experiment, such as number of skus and total inventory capacity.
+
+## Results and Analysis
+### brain training results on single sku:
+We studied the effects of demand forecast uncertainty and ratio of missed sale cost to inventory holding (cost ratio). Conservatively, we trained different brains for different cost ratio. A sample brain training graph is shown below. 
+<img src = "img/Brain_trained_cost_ratio10.png" alt= "drawing" width="500"/>
+The image below shows total cost vs level of uncertainty for different cost ratios. Brain plus mip outperforms classical optimizer when cost ratio is higher. This makes sense as higher missed sales cost accentuates the need for safety stock levels. When cost ratio is equal to one, there is no need to hold safety stock level as holding extra inventory is as costly as missing the sale.
+<img src = "img/SingleSKU_cost_ratio.png" alt= "drawing" width="500"/>
