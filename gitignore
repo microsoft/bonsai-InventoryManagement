@@ -1,0 +1,6 @@
+*/__pycache__/*
+/bonsai/logs/*
+*.npy
+/bonsai/*/.ipynb_checkpoints/*
+/analysis/kqlmagic/
+/bonsai/logs/*.csv
