@@ -26,13 +26,13 @@ We continue with M=3. As and example, the retailor is located in New York. He ma
 We propose a hybrid approach due to the following reasons:
 
 (1) 100s of products with constraints leads to curse of dimensionality where AI only solutions becomes cumbersome if not practically impossible to train. 
-(2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in an time efficient way. Searching optimal solution may take very long time.
+(2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in a time efficient way. Searching for an optimal solution may take very long time due to demand forecast uncertainties.
 
-As an alternative, we will use brain as a de-fuzzifier that makes a crisp decision on ideal safety stock levels for each product without considering any cross-product constraints. We train brain for products with different missed sale to inventory holding cost ratio (e.g. 10, 100, 1000). Once brains are trained, we will loop over the products with different cost ratio and use mip solver to make final adjustments on the purchase order levels.  
+As an alternative, we will use brain as a de-fuzzifier that makes a crisp decision on ideal safety stock levels for each product without considering any cross-product constraints. Then classical optimization method of mixed integer programming can be applied. In this approach, We train brain for products with different missed sale to inventory holding cost ratio (e.g. 10, 100, 1000). Once the brains are trained, we use the policies to specify ideal future safety stock level for each product. Then, we construct desired future stock levels as follows: forecast mean + anticipated ideal safety stock levels. Finally, we use mip solver to make final adjustments on the purchase order levels, while satisfying constraints.  
 
 The below image summarizes the approach:
 
-<img src = "img/SolutionArchitecture.png" alt= "drawing" width="500"/>
+<img src = "img/SolutionArchitecture_train_deploy.png" alt= "drawing" width="1000"/>
 
 ### Objective
 Minimize cost of missing demand + cost of holding for each single product. 
