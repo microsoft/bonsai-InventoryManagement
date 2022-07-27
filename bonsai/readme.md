@@ -93,7 +93,8 @@ The image below shows total cost vs level of uncertainty for different cost rati
 
 Refer to the jupyter notebook for details. 
 ### Assessment on multisku (step2 in solution architecture):
-Following the procedure shown in step2 of the solution architecture, brain plus mip outperforms mip only approach. A sample comparison is shown below. 
+Following the procedure shown in step2 of the solution architecture, brain plus mip outperforms mip only approach. A sample comparison is shown below.
+
 <img src = "img/MultiSKU.png" alt= "drawing" width="800"/>
 
 Refer to the jupyter notebook for details.
