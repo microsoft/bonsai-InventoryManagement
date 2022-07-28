@@ -98,3 +98,7 @@ Following the procedure shown in step2 of the solution architecture, brain plus 
 <img src = "img/MultiSKU.png" alt= "drawing" width="800"/>
 
 Refer to the jupyter notebook for details.
+
+### Developer guide
+For a similar multi-sku problem, make sure to modify essential files, such as chain.definition.py, constraints.py. Then modify the SKUInfoFactory in multi_sku.py. You may also create a new factory following similar template, but make sure to import and replace SKUInfoFactory with your costume SKUInfoFactory, in relevant files such as inventory_management.py  
+For different demand and lead profiles, make sure to develop the code in utils_demand.py and utils.py
