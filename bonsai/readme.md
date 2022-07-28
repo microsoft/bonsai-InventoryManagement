@@ -91,13 +91,15 @@ The image below shows total cost vs level of uncertainty for different cost rati
 
 <img src = "img/SingleSKU_cost_ratio.png" alt= "drawing" width="800"/>
 
-Refer to the jupyter notebook for details. 
+Refer to the jupyter notebookes for details.
+Note: log files are not included due to their large sizes.  
 ### Assessment on multisku (step2 in solution architecture):
 Following the procedure shown in step2 of the solution architecture, brain plus mip outperforms mip only approach. A sample comparison is shown below.
 
 <img src = "img/MultiSKU.png" alt= "drawing" width="800"/>
 
-Refer to the jupyter notebook for details.
+Refer to the jupyter notebooks in log folder for details. 
+Note: log files are not included due to their large sizes. 
 
 ### Developer guide
 For a similar multi-sku problem, make sure to modify essential files, such as chain.definition.py, constraints.py. Then modify the SKUInfoFactory in multi_sku.py. You may also create a new factory following similar template, but make sure to import and replace SKUInfoFactory with your costume SKUInfoFactory, in relevant files such as inventory_management.py  
