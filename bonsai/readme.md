@@ -19,14 +19,15 @@ The retailer's supply chain resembles a multi-echelon inventory system, where al
 
 [reference: Hubbs et al.: OR-Gym: A Reinforcement Learning Library]
 
-We continue with M=3. As and example, the retailor is located in New York. He makes product purchases from a distribution center in Tennessee, with a lead time of 2 days. The Tennessee distribution center makes the purchases from another distribution center in Los Angeles with a lead time of 3 days. Subsequently, this LA distributor makes purchases from a manufacturer in China with a lead time of 4 days. The manufacturer has access to unlimited supply of raw materials. 
+We continue with M = 3. As and example, the retailor is located in New York. He makes product purchases from a distribution center in Tennessee, with a lead time of 2 days. The Tennessee distribution center makes the purchases from another distribution center in Los Angeles with a lead time of 3 days. Subsequently, this LA distributor makes purchases from a manufacturer in China with a lead time of 4 days. The manufacturer has access to unlimited supply of raw materials. 
 
 ### Solution architecture
 
 We propose a hybrid approach due to the following reasons:
 
 (1) 100s of products with constraints leads to curse of dimensionality where AI only solutions becomes cumbersome if not practically impossible to train. 
-(2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in a time efficient way. Searching for an optimal solution may take very long time due to demand forecast uncertainties.
+
+(2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in a time efficient way. Searching for an optimal solution may take very long time due to demand forecast uncertainties. Not to mention that other aspects of supply chain such as lead time may become uncertain as well, limiting deterministic classical search methods inefficient to solve the problem. 
 
 As an alternative, we will use brain as a de-fuzzifier that makes a crisp decision on ideal safety stock levels for each product without considering any cross-product constraints. Then classical optimization method of mixed integer programming can be applied. In this approach, We train brain for products with different missed sale to inventory holding cost ratio (e.g. 10, 100, 1000). Once the brains are trained, we use the policies to specify ideal future safety stock level for each product. Then, we construct desired future stock levels as follows: forecast mean + anticipated ideal safety stock levels. Finally, we use mip solver to make final adjustments on the purchase order levels, while satisfying constraints.  
 
