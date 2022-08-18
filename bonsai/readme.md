@@ -65,7 +65,7 @@ Use the following inkling file in bonsai platform to train brain that handles a 
 ```
 MachineTeacher_Tutorial
 ```
-
+Note that brain training is only required for single sku. For multi-sku, We will export trained single-sku brain and use it within a loop over all the skus. 
 ### Assessment logs
 
 To create assessment logs for 
