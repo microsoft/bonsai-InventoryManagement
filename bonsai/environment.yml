@@ -1,4 +1,4 @@
-name: bonsai-orgym
+name: supplychain
 channels:
   - defaults
   - conda-forge
