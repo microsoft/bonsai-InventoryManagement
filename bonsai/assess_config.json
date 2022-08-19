@@ -14,7 +14,7 @@
         "lead_profile": 2,
         "solver": 1,
         "filter_alpha": 0.2,
-        "missed_sale_to_inventory_cost_ratio": 10,
+        "missed_sale_to_inventory_cost_ratio": 100,
         "action_frequency": 10,
         "number_of_sku": 200,
         "number_of_stages": 4, 

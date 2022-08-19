@@ -60,12 +60,22 @@ az acr build --image IMAGENAME --file Dockerfile_mipPlusBrain --registry YOURBON
 
 ### Brain training
 
-Use the following inkling file in bonsai platform to train brain that handles a single sku with wide range of missed sale to inventory cost ratio. You may also chose a separate brain for a specific missed sale to inventory cost ratio. 
+Use the following inkling file in bonsai platform to train brain that handles a single sku with wide range of missed sale to inventory cost ratio. You may also chose a separate brain for a specific missed sale to inventory cost ratio.
 
+To train brain for specif cost ratio, use the following inkling file and modify "cost_ratio" constant near top of the file. The default is cost_ratio = 100. The results shown in the following sections are based on this inkling file. 
 ```
-MachineTeacher_Tutorial
+MachineTeacher_const_ratio.ink
+'''
+In order to train for different cost ratio using single brain training, you may use the following inkling. 
 ```
-Note that brain training is only required for single sku. For multi-sku, We will export trained single-sku brain and use it within a loop over all the skus. 
+MachineTeacher_cost_ratio_range.ink
+```
+To train for a generic use case with variable cost_ratio and lead time, please refer to the following inkling. Please note that we have not done any experiments to support variable lead time, yet. 
+```
+MachineTeacher_generic.ink
+```
+Note that brain training is only required for single sku. For multi-sku, We will export trained single-sku brain and use it within a loop over all the skus. Then the mip solver optimizes the final purchase orders while respecting overall capacity constraints. 
+
 ### Assessment logs
 
 To create assessment logs for 
