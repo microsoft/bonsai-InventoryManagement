@@ -74,7 +74,8 @@ In order to train for different cost ratio using single brain training, you may 
 MachineTeacher_range_cost_ratio.ink
 ```
 
-To train for a generic use case with variable cost_ratio and lead time, please refer to the following inkling. Please note that we have not done any experiments to support variable lead time, yet. 
+To train for a generic use case with variable cost_ratio and lead time, please refer to the following inkling. Please note that we have not done any experiments to support results with variable lead time, yet. Feel free to experiment.
+
 ```
 MachineTeacher_generic.ink
 ```

@@ -34,7 +34,6 @@ from microsoft_bonsai_api.simulator.generated.models import (
 )
 from azure.core.exceptions import HttpResponseError
 import argparse
-import or_gym
 import numpy as np
 from send2trash import TrashPermissionError
 from policies import random_policy, brain_policy, forget_memory, safety_policy, zero_policy, random_safety_policy
