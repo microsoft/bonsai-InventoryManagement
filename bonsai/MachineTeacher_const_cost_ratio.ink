@@ -24,7 +24,6 @@ type ObservableState {
     demand_forecast: number[15],
     demand_sigma: number[15],
     inventory: number[3],
-    
 }
 
 function GetObservableStates(State:SimState) : ObservableState{
@@ -34,8 +33,6 @@ function GetObservableStates(State:SimState) : ObservableState{
         demand_sigma: State.demand_sigma,
         inventory: State.inventory,
         demand_actual: State.demand_actual,
-        leads: State.leads, 
-        missed_sale_to_inventory_cost_ratio:State.missed_sale_to_inventory_cost_ratio
     }
 }
 
