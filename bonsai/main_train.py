@@ -1,6 +1,5 @@
 
 #!/usr/bin/env python3
-
 """
 MSFT Bonsai SDK3 Template for Simulator Integration using Python
 Copyright 2021 Microsoft
