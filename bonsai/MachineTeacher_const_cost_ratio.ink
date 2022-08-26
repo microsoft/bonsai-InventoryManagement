@@ -5,7 +5,7 @@ using Goal
 
 const action_frequency_days = 10 # in days 
 const max_iteration: number = Math.Floor(200/action_frequency_days)
-
+const cost_ratio = 100
 type SimState {
     # sim observation: current order + 10 previous orders for 3 stages  
     transit_orders: number<0 .. 100>[45], 
@@ -24,8 +24,7 @@ type ObservableState {
     demand_forecast: number[15],
     demand_sigma: number[15],
     inventory: number[3],
-    leads: number[3],
-    missed_sale_to_inventory_cost_ratio: number
+    
 }
 
 function GetObservableStates(State:SimState) : ObservableState{
@@ -106,7 +105,7 @@ graph (input: ObservableState) {
                     ph2:0.05,
                     randvar:1,
                     action_frequency: action_frequency_days,
-                    missed_sale_to_inventory_cost_ratio: number<10 ..100 step 10>,
+                    missed_sale_to_inventory_cost_ratio: cost_ratio,
                 }
 
             }
@@ -121,7 +120,7 @@ graph (input: ObservableState) {
                     ph2:0.05,
                     randvar:1,
                     action_frequency: action_frequency_days,
-                    missed_sale_to_inventory_cost_ratio: number<10 ..1000 step 10>,
+                    missed_sale_to_inventory_cost_ratio: cost_ratio,
                 }
             }
             lesson `lesson 3`{
@@ -135,7 +134,7 @@ graph (input: ObservableState) {
                     ph2:0.05,
                     randvar:1,
                     action_frequency: action_frequency_days,
-                    missed_sale_to_inventory_cost_ratio: number<10 .. 1000 step 10>,
+                    missed_sale_to_inventory_cost_ratio: cost_ratio,
                 }
             }
         }
