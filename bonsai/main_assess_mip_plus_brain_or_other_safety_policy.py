@@ -158,7 +158,6 @@ class TemplateSimulatorSession:
             config["number_of_sku"] = 1
             config["number_of_stages"] = 4
             self.constraint_coupling = bool(0)
-        print(f'episode config is :\n: {config}')
         self.simulator = make_multi_sku_env(config=config)
         self.mip_solver = MipSolver(config=None)
         self.sum_cost_action_freq = 0
@@ -440,7 +439,6 @@ def test_policy(
     scenario_configs = assess_info['episodeConfigurations']
     num_episodes = assess_info['number_of_episodes'] + 1
     num_iterations = assess_info['episodeLength']
-    print(scenario_configs)
     current_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     log_file_name = current_time + "_" + policy_name + "_log.csv"
     sim = TemplateSimulatorSession(
