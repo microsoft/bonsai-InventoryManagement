@@ -52,9 +52,15 @@ def generate_random_sku_info_as_json(n_skus = 1, n_stages = 4, ratio = 100):
         json.dump(sku_info, f)
     return sku_info
 
-def generate_random_sku_info_as_json2(n_skus = 1, n_stages = 4): 
+def generate_random_sku_info_as_json2(
+        n_skus = 1, n_stages = 4, 
+        config = {"missed_sale_to_inventory_cost_ratio_variable_per_sku": "no",
+                  "missed_sale_to_inventory_cost_ratio": 100}):
     sku_info = {}
-    missed_sale_to_inventory_cost_ratio = np.power(10, np.random.uniform(0,3, n_skus))
+    if config["missed_sale_to_inventory_cost_ratio_variable_per_sku"] == "yes":
+        missed_sale_to_inventory_cost_ratio = np.power(10, np.random.uniform(0,3, n_skus))
+    else:
+        missed_sale_to_inventory_cost_ratio = np.array(int(n_skus)*[config["missed_sale_to_inventory_cost_ratio"]])
     for i in range(0,n_skus):
         vol = np.round(1 + i*0.1,2)
         random_price = np.random.uniform(1,100)
@@ -328,7 +334,7 @@ class SKUInfoFactoryRandom(InfoFactory):
             cost_ratio = config["missed_sale_to_inventory_cost_ratio"]
         except:
             cost_ratio = 100 # default 
-        generate_random_sku_info_as_json2(n_skus = sku_count, n_stages = topology.number_of_stages)
+        generate_random_sku_info_as_json2(n_skus = sku_count, n_stages = topology.number_of_stages, config = config)
         self.sku_info = load_sku_info(filename = 'sku_properties.json')
         self._prepare_generic_info()
         self._prepare_dynamic_info(n_levels=self.n_levels, config = config)
