@@ -55,7 +55,7 @@ An example demand profile consumed by the simulator is shown below showing actua
 To build bonsai sim package, login using azure-cli and then run the following command.
 
 ```
-az acr build --image IMAGENAME --file Dockerfile_mipPlusBrain --registry YOURBONSAIREGISTRY .
+az acr build --image IMAGENAME --file Dockerfile --registry YOURBONSAIREGISTRY .
 ```
 
 ### Brain training
@@ -88,7 +88,7 @@ To create assessment logs for
 (1) multi-sku mip plus brain approach:
 first export trained brain and then run
 ```
-python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported 
+python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported --test-exported <PORT>
 --log-iterations
 ```
 (2) multi-sku mip only approach:
