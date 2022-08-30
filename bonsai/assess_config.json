@@ -16,7 +16,7 @@
         "filter_alpha": 0.2,
         "missed_sale_to_inventory_cost_ratio": 100,
         "action_frequency": 10,
-        "number_of_sku": 200,
+        "number_of_sku": 2,
         "number_of_stages": 4, 
         "constraint_coupling": 1,
         "inventory_capacity": 5000,

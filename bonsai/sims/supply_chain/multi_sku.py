@@ -391,7 +391,6 @@ class SKUInfoFactoryRandom(InfoFactory):
                 ph2: float = 0.05, randvar: float = 1,
                 n_levels = 3, config = None):
 
-
         try:
             sigmax = config['sigmax']
         except:
