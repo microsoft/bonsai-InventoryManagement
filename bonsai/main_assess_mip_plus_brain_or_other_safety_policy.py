@@ -89,7 +89,6 @@ class TemplateSimulatorSession:
         # Initialize python api for simulator
         self.simulator = make_multi_sku_env()
         self.env_name = env_name
-        #self.state = self.simulator.reset().tolist()
         self.sim_reward = 0
         self.iter_count = 0
         self.sum_cost_action_freq = 0
@@ -416,7 +415,7 @@ def env_setup(env_file: str = ".env"):
 
 def test_policy(
     render: bool = False,
-    num_iterations: int = 200,
+    num_iterations: int = 20,
     log_iterations: bool = False,
     policy=random_safety_policy,
     policy_name: str = "random_safety_policy",
@@ -435,7 +434,8 @@ def test_policy(
     print("assess_info")
     print(assess_info)
     scenario_configs = assess_info['episodeConfigurations']
-    num_episodes = assess_info['episodeLength'] + 1
+    num_episodes = assess_info['number_of_episodes'] + 1
+    num_iterations = assess_info['number_of_episodes']
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     log_file_name = current_time + "_" + policy_name + "_log.csv"
@@ -462,11 +462,8 @@ def test_policy(
             sim.config = scenario_configs
             #sim.log_iterations(sim_state, {}, episode, iteration)
         print(f"Running iteration #{iteration} for episode #{episode}")
-        #iteration += 1
         print('num_iterations:', num_iterations)
-        import time as tt
-        # tt.sleep(3)
-        num_iterations = 20
+
         while not terminal:
             action = {"safety_stock_stage0": [],
                       "safety_stock_stage1": [],

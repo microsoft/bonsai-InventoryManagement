@@ -86,7 +86,7 @@ class SKUGenericInfo:
     '''
     General sku information, mostly static but may change over time as well. 
     '''
-    id: int  
+    id: int 
     volume: float
     storage_cost: List[float] #at each stage  
     missed_sale_cost: List[float] # selling price - replenishment cost 

@@ -22,5 +22,6 @@
         "inventory_capacity": 5000,
         "mode": "assessment"
     },
-    "episodeLength": 200
+    "episodeLength": 20,
+    "number_of_episodes": 100
 }
