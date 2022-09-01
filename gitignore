@@ -3,3 +3,4 @@
 *.npy
 /bonsai/*/.ipynb_checkpoints/*
 /analysis/kqlmagic/
+/bonsai/.env

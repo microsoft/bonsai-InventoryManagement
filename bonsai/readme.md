@@ -88,8 +88,7 @@ To create assessment logs for
 (1) multi-sku mip plus brain approach:
 first export trained brain and then run
 ```
-python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported --test-exported <PORT>
---log-iterations
+python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported --test-exported <PORT> --log-iterations
 ```
 (2) multi-sku mip only approach:
 run the following command 
