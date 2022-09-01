@@ -96,6 +96,7 @@ run the following command
 python main_assess_mip_only.py --test-local --log-iterations 
 ```
 Take note of "assess_config.json" for details of the experiment, such as number of skus and total inventory capacity.
+Also make sure to run the assessments long enough (over 1000 episodes) to account for variabilities due to stochasticity of the environment and for statistically significant results.
 
 ## Results and Analysis
 ### Single SKU brain training (step1 in solution architecture) and assessment results:

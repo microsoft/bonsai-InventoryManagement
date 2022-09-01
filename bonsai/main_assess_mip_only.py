@@ -148,12 +148,13 @@ class TemplateSimulatorSession:
 
     def episode_start(self, config: Dict[str, Any]):
         """ Called at the start of each episode """
-
+        self.episode_config = config
         if "mode" in config.keys():
             self.mode = "assess"
             print('choosing random sigma for assessment only')
-            self.episode_sigma = random.randint(0, config["sigmax"])
+            self.episode_sigma = np.random.randint(0, config["sigmax"])
             config["sigmax"] = self.episode_sigma
+            self.episode_config["sigmax"] = self.episode_sigma
             self.constraint_coupling = bool(config["constraint_coupling"])
         else:
             self.mode = "train"
@@ -161,7 +162,7 @@ class TemplateSimulatorSession:
             config["number_of_stages"] = 4
             self.constraint_coupling = bool(0)
 
-        self.simulator = make_multi_sku_env(config=config)
+        self.simulator = make_multi_sku_env(config=self.episode_config)
         self.mip_solver = MipSolver(config=None)
         self.sum_cost_action_freq = 0
         self.action_frequency = config["action_frequency"]
@@ -302,7 +303,7 @@ class TemplateSimulatorSession:
 
         log_state = state.copy()
         log_action = action.copy() if action is not None else 0
-        log_config = self.config.copy()
+        log_config = self.episode_config  # self.config.copy()
         for key, value in log_state.items():
             if type(value) == list:
                 log_state[key] = str(log_state[key])
