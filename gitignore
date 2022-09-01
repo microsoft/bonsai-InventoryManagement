@@ -6,3 +6,4 @@
 /bonsai/*.env
 bonsai\*.env
 **/*.env
+/bonsai/.env
