@@ -17,6 +17,7 @@ Usage:
 from asyncio import futures
 from functools import partial
 import json
+from copy import deepcopy
 import random
 import math
 import time
@@ -434,7 +435,7 @@ def test_policy(
     for episode in range(1, num_episodes):
         iteration = 1
         terminal = False
-        sim_state = sim.episode_start(config=scenario_configs)
+        sim_state = sim.episode_start(config=deepcopy(scenario_configs))
         sim_state = sim.get_state()
 
         print('policy name: ', policy_name)
