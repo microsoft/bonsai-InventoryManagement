@@ -5,4 +5,4 @@
 /analysis/kqlmagic/
 /bonsai/.env
 bonsai\.env
-**/.env
+**/*.env
