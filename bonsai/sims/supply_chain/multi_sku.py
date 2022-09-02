@@ -91,6 +91,7 @@ def generate_random_sku_info_as_json3(
     '''
     Properties of units, such as missed sale and holding cost are deterministic and grows linearly with sku id.
     '''
+
     sku_info = {}
     if config["missed_sale_to_inventory_cost_ratio_variable_per_sku"] == "yes":
         missed_sale_to_inventory_cost_ratio = np.power(10, np.random.uniform(0,3, n_skus))
@@ -489,8 +490,6 @@ class SKUInfoFactoryRandom(InfoFactory):
         # except: 
         #     config_profile = 1 
           
-            
-        print(offset)
         init_transit_order_min = 0
         init_transit_order_max = 1
         assert(init_transit_order_min<init_transit_order_max)

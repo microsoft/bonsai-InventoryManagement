@@ -41,9 +41,9 @@ def random_safety_policy(state: Dict[str, float]):
     Ignore the state, move randomly.
     """
     action = {
-        "safety_stock_stage0": random.randint(0, 10),
-        "safety_stock_stage1": random.randint(0, 10),
-        "safety_stock_stage2": random.randint(0, 10)
+        "safety_stock_stage0": np.random.randint(0, 10),
+        "safety_stock_stage1": np.random.randint(0, 10),
+        "safety_stock_stage2": np.random.randint(0, 10)
     }
     return action
 

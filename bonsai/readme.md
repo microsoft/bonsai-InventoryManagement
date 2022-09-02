@@ -55,7 +55,7 @@ An example demand profile consumed by the simulator is shown below showing actua
 To build bonsai sim package, login using azure-cli and then run the following command.
 
 ```
-az acr build --image IMAGENAME --file Dockerfile --registry YOURBONSAIREGISTRY .
+az acr build --image IMAGENAME --registry YOURBONSAIREGISTRY .
 ```
 
 ### Brain training
