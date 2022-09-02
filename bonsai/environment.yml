@@ -1,4 +1,4 @@
-name: bonsai-orgym
+name: supplychain
 channels:
   - defaults
   - conda-forge
@@ -12,10 +12,8 @@ dependencies:
     - microsoft-bonsai-api==0.1.3
     - bonsai-cli==1.0.11
     - python-dotenv==0.13.0
-    - ray==0.8.1
-    - "ray[rllib]"
-    - tensorflow==2.1
     - gym==0.17.1
     - jupyterlab
     - mip
     - matplotlib
+    - scipy

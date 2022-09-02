@@ -18,6 +18,7 @@ from asyncio import futures
 from functools import partial
 import json
 import random
+from copy import deepcopy
 import math
 import time
 import os
@@ -34,7 +35,6 @@ from microsoft_bonsai_api.simulator.generated.models import (
 )
 from azure.core.exceptions import HttpResponseError
 import argparse
-import or_gym
 import numpy as np
 from send2trash import TrashPermissionError
 from policies import random_policy, brain_policy, forget_memory, safety_policy, zero_policy, random_safety_policy
@@ -44,13 +44,19 @@ from sims.supply_chain.chain_definition import SupplyChainTopology
 from sims.supply_chain.inventory_management import InvManagementLostSalesMultiSKUEnv
 from sims.supply_chain.mip_solver import MipSolver
 
+random.seed(10)
 
-def make_multi_sku_env(config: dict = {'number_of_stages': 4, 'number_of_sku': 1}) -> InvManagementLostSalesMultiSKUEnv:
+
+def make_multi_sku_env(config: Dict[str, Any] =
+                       {'number_of_stages': 4, 'number_of_sku': 1,
+                        "missed_sale_to_inventory_cost_ratio_variable_per_sku": "no",
+                        "missed_sale_to_inventory_cost_ratio": 100}) -> InvManagementLostSalesMultiSKUEnv:
     '''
-    Input: number of skus and stages in multi-echelon inventory management 
-    Output: multisku simulation environment 
+    Input: number of skus and stages in multi-echelon inventory management
+    Output: multisku simulation environment
     Note: skus are built using sku info factory
     '''
+    print(f'sku making config is {config}')
     my_chain = SupplyChainTopology(
         number_of_stages=config["number_of_stages"])
     skus = SKUInfoFactoryRandom(
@@ -90,13 +96,12 @@ class TemplateSimulatorSession:
         # Initialize python api for simulator
         self.simulator = make_multi_sku_env()
         self.env_name = env_name
-        #self.state = self.simulator.reset().tolist()
         self.sim_reward = 0
         self.iter_count = 0
         self.sum_cost_action_freq = 0
         self.constraint_relaxation = 0
         self.mip_cost_config = "Safety"
-        self.missed_sale_to_inventory_cost_ratio = 10
+        self.missed_sale_to_inventory_cost_ratio = 100
         self.sim_terminal = False
         self.render = render
         self.log_data = log_data
@@ -144,12 +149,13 @@ class TemplateSimulatorSession:
 
     def episode_start(self, config: Dict[str, Any]):
         """ Called at the start of each episode """
-
+        self.episode_config = config
         if "mode" in config.keys():
             self.mode = "assess"
             print('choosing random sigma for assessment only')
-            self.episode_sigma = random.randint(0, config["sigmax"])
+            self.episode_sigma = np.random.randint(0, config["sigmax"])
             config["sigmax"] = self.episode_sigma
+            self.episode_config["sigmax"] = self.episode_sigma
             self.constraint_coupling = bool(config["constraint_coupling"])
         else:
             self.mode = "train"
@@ -157,7 +163,7 @@ class TemplateSimulatorSession:
             config["number_of_stages"] = 4
             self.constraint_coupling = bool(0)
 
-        self.simulator = make_multi_sku_env(config=config)
+        self.simulator = make_multi_sku_env(config=self.episode_config)
         self.mip_solver = MipSolver(config=None)
         self.sum_cost_action_freq = 0
         self.action_frequency = config["action_frequency"]
@@ -260,7 +266,7 @@ class TemplateSimulatorSession:
         data = {**state, **action, **config}
         data["episode"] = episode
         data["iteration"] = iteration
-        #print('data: \n', data)
+        # print('data: \n', data)
         log_df = pd.DataFrame(data, index=[0])
 
         if episode == 1 and iteration == 1:
@@ -316,7 +322,7 @@ class TemplateSimulatorSession:
 
         log_state = state.copy()
         log_action = action.copy() if action is not None else 0
-        log_config = self.config.copy()
+        log_config = self.episode_config  # self.config.copy()
         for key, value in log_state.items():
             if type(value) == list:
                 log_state[key] = str(log_state[key])
@@ -338,8 +344,6 @@ class TemplateSimulatorSession:
         except:
             # test loop with random or exported brain
             pass
-
-        # print('data?????????????????????????????????????????????: \n', data)
 
         log_df = pd.DataFrame(data, index=[0])
 
@@ -419,7 +423,7 @@ def env_setup(env_file: str = ".env"):
 
 def test_policy(
     render: bool = False,
-    num_iterations: int = 200,
+    num_iterations: int = 20,
     log_iterations: bool = False,
     policy=random_safety_policy,
     policy_name: str = "random_safety_policy",
@@ -438,8 +442,8 @@ def test_policy(
     print("assess_info")
     print(assess_info)
     scenario_configs = assess_info['episodeConfigurations']
-    num_episodes = assess_info['episodeLength'] + 1
-
+    num_episodes = assess_info['number_of_episodes'] + 1
+    num_iterations = assess_info['episodeLength']
     current_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     log_file_name = current_time + "_" + policy_name + "_log.csv"
     sim = TemplateSimulatorSession(
@@ -448,7 +452,7 @@ def test_policy(
     for episode in range(1, num_episodes):
         iteration = 1
         terminal = False
-        sim_state = sim.episode_start(config=scenario_configs)
+        sim_state = sim.episode_start(config=deepcopy(scenario_configs))
         sim_state = sim.get_state()
 
         print('policy name: ', policy_name)
@@ -463,13 +467,10 @@ def test_policy(
 
         if log_iterations:
             sim.config = scenario_configs
-            #sim.log_iterations(sim_state, {}, episode, iteration)
+            # sim.log_iterations(sim_state, {}, episode, iteration)
         print(f"Running iteration #{iteration} for episode #{episode}")
-        #iteration += 1
         print('num_iterations:', num_iterations)
-        import time as tt
-        # tt.sleep(3)
-        num_iterations = 20
+
         while not terminal:
             action = {"safety_stock_stage0": [],
                       "safety_stock_stage1": [],
@@ -550,7 +551,7 @@ def test_policy(
                 action["safety_stock_stage2"].append(brain_action[2])
                 action['skus_safety'].append(brain_action)
                 # update safety
-                #sim.simulator.skus.info.dynamic[sku].safety = brain_action
+                # sim.simulator.skus.info.dynamic[sku].safety = brain_action
 
             # passing empty actions as sku handles safety
 

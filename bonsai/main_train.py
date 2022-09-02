@@ -1,6 +1,5 @@
 
 #!/usr/bin/env python3
-
 """
 MSFT Bonsai SDK3 Template for Simulator Integration using Python
 Copyright 2021 Microsoft
@@ -44,7 +43,10 @@ from sims.supply_chain.inventory_management import InvManagementLostSalesMultiSK
 from sims.supply_chain.mip_solver import MipSolver
 
 
-def make_multi_sku_env(config: dict = {'number_of_stages': 4, 'number_of_sku': 1}) -> InvManagementLostSalesMultiSKUEnv:
+def make_multi_sku_env(config: Dict[str, Any] =
+                       {'number_of_stages': 4, 'number_of_sku': 1,
+                        "missed_sale_to_inventory_cost_ratio_variable_per_sku": "no",
+                        "missed_sale_to_inventory_cost_ratio": 100}) -> InvManagementLostSalesMultiSKUEnv:
     '''
     Input: number of skus and stages in multi-echelon inventory management 
     Output: multisku simulation environment 
@@ -93,7 +95,7 @@ class TemplateSimulatorSession:
         self.sum_cost_action_freq = 0
         self.constraint_relaxation = 0
         self.mip_cost_config = "Safety"
-        self.missed_sale_to_inventory_cost_ratio = 10
+        self.missed_sale_to_inventory_cost_ratio = 100
         self.sim_terminal = False
         self.render = render
         self.log_data = log_data
@@ -135,7 +137,7 @@ class TemplateSimulatorSession:
         sim_state["mip_solver_status"] = self.mip_cost_config
         sim_state["sim_reward"] = float(self.sum_cost_action_freq)
         sim_state["missed_sale_to_inventory_cost_ratio"] = float(
-            self.missed_sale_to_inventory_cost_ratio)
+            self.simulator.skus.info.generic[0].missed_sale_cost[0]/self.simulator.skus.info.generic[0].storage_cost[0])
         print("sim_state:\n", sim_state)
         return sim_state
 
@@ -317,8 +319,6 @@ class TemplateSimulatorSession:
             # test loop with random or exported brain
             pass
 
-        # print('data?????????????????????????????????????????????: \n', data)
-
         log_df = pd.DataFrame(data, index=[0])
 
         if episode == 1 and iteration == 1:
@@ -397,7 +397,7 @@ def env_setup(env_file: str = ".env"):
 
 def test_policy(
     render: bool = False,
-    num_iterations: int = 200,
+    num_iterations: int = 20,
     log_iterations: bool = False,
     policy=random_safety_policy,
     policy_name: str = "random_safety_policy",
@@ -416,7 +416,8 @@ def test_policy(
     print("assess_info")
     print(assess_info)
     scenario_configs = assess_info['episodeConfigurations']
-    num_episodes = assess_info['episodeLength'] + 1
+    num_episodes = assess_info['number_of_episodes'] + 1
+    num_iterations = assess_info['episodeLength']
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     log_file_name = current_time + "_" + policy_name + "_log.csv"
@@ -443,11 +444,7 @@ def test_policy(
             sim.config = scenario_configs
             #sim.log_iterations(sim_state, {}, episode, iteration)
         print(f"Running iteration #{iteration} for episode #{episode}")
-        #iteration += 1
         print('num_iterations:', num_iterations)
-        import time as tt
-        # tt.sleep(3)
-        num_iterations = 20
         while not terminal:
             action = []
             states_log = {}

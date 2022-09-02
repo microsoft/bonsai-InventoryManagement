@@ -4,7 +4,7 @@ __author__: Hossein Khadivi Heris
 '''
 from dataclasses import dataclass, field, asdict, replace
 from abc import ABC, abstractmethod
-from fileinput import filename 
+from fileinput import filename
 import json 
 import random
 import string
@@ -31,7 +31,10 @@ def load_sku_info(filename: str):
     return info
 
 
-def generate_random_sku_info_as_json(n_skus = 1, n_stages = 4, ratio = 100): 
+def generate_sku_info_as_json(n_skus = 1, n_stages = 4, ratio = 100): 
+    '''
+    Sku static information used during brain training. 
+    '''
     missed_sale_to_inventory_cost_ratio = ratio
     sku_info = {}
     for i in range(0,n_skus):
@@ -52,9 +55,18 @@ def generate_random_sku_info_as_json(n_skus = 1, n_stages = 4, ratio = 100):
         json.dump(sku_info, f)
     return sku_info
 
-def generate_random_sku_info_as_json2(n_skus = 1, n_stages = 4): 
+def generate_random_sku_info_as_json2(
+        n_skus = 1, n_stages = 4, 
+        config = {"missed_sale_to_inventory_cost_ratio_variable_per_sku": "no",
+                  "missed_sale_to_inventory_cost_ratio": 100}):
+    '''
+    Properties of units, such as missed sale and holding cost are randomized. This may lead to inconsistent cost when number of skus<100.  
+    '''
     sku_info = {}
-    missed_sale_to_inventory_cost_ratio = np.power(10, np.random.uniform(0,3, n_skus))
+    if config["missed_sale_to_inventory_cost_ratio_variable_per_sku"] == "yes":
+        missed_sale_to_inventory_cost_ratio = np.power(10, np.random.uniform(0,3, n_skus))
+    else:
+        missed_sale_to_inventory_cost_ratio = np.array(int(n_skus)*[config["missed_sale_to_inventory_cost_ratio"]])
     for i in range(0,n_skus):
         vol = np.round(1 + i*0.1,2)
         random_price = np.random.uniform(1,100)
@@ -72,6 +84,42 @@ def generate_random_sku_info_as_json2(n_skus = 1, n_stages = 4):
         json.dump(sku_info, f)
     return sku_info
 
+def generate_random_sku_info_as_json3(
+        n_skus = 1, n_stages = 4, 
+        config = {"missed_sale_to_inventory_cost_ratio_variable_per_sku": "no",
+                  "missed_sale_to_inventory_cost_ratio": 100}):
+    '''
+    Properties of units, such as missed sale and holding cost are deterministic and grows linearly with sku id.
+    '''
+
+    sku_info = {}
+    if config["missed_sale_to_inventory_cost_ratio_variable_per_sku"] == "yes":
+        missed_sale_to_inventory_cost_ratio = np.power(10, np.random.uniform(0,3, n_skus))
+    else:
+        missed_sale_to_inventory_cost_ratio = np.array(int(n_skus)*[config["missed_sale_to_inventory_cost_ratio"]])
+    for i in range(0,n_skus):
+        vol = np.round(1 + i*0.1,2)
+        
+        # random_price = np.random.uniform(1,100)
+        # unit_price = np.round([random_price*(n_stages - j)/n_stages for j in range(n_stages)],2)
+        # missed_sale_cost = np.round(unit_price/4,2) # 1/4 of price is the profit for each sku, as such missed sale 
+        # unit_cost = np.round(unit_price-missed_sale_cost,2)
+        # storage_cost = np.round(missed_sale_cost/int(missed_sale_to_inventory_cost_ratio[i]),5)
+        
+        unit_price = np.round([(1 + i*0.2)*(n_stages - j)/n_stages for j in range(n_stages)],2)
+        missed_sale_cost = np.round(unit_price/4,2) # 1/4 of price is the profit for each sku, as such missed sale 
+        unit_cost = np.round(unit_price-missed_sale_cost,2)
+        missed_sale_cost = np.round(unit_price/10,2) 
+        storage_cost = np.round(missed_sale_cost/int(missed_sale_to_inventory_cost_ratio[i]),5)
+        sku_info[i] = asdict(SKUGenericInfo(id = i, volume = vol,
+                           storage_cost = storage_cost.tolist(), 
+                           unit_price = unit_price.tolist(),
+                           unit_cost = unit_cost.tolist(),
+                           batch = n_stages*[0], 
+                           missed_sale_cost=missed_sale_cost.tolist()))   
+    with open('sku_properties.json', "w") as f:
+        json.dump(sku_info, f)
+    return sku_info
 
 @dataclass
 class demand_info:
@@ -86,7 +134,7 @@ class SKUGenericInfo:
     '''
     General sku information, mostly static but may change over time as well. 
     '''
-    id: int  
+    id: int 
     volume: float
     storage_cost: List[float] #at each stage  
     missed_sale_cost: List[float] # selling price - replenishment cost 
@@ -148,6 +196,9 @@ class InfoFactory(ABC):
         """
 @dataclass()
 class SKUInfoFactory(InfoFactory):
+    '''
+    A deterministic factory for creating skus properties such as holding and missed sale cost 
+    '''
 
     constraints: MultiSKUConstraints
     sku_count: int = 10
@@ -160,7 +211,7 @@ class SKUInfoFactory(InfoFactory):
             cost_ratio = config["missed_sale_to_inventory_cost_ratio"]
         except:
             cost_ratio = 100 # default 
-        generate_random_sku_info_as_json(n_skus = sku_count, n_stages = topology.number_of_stages, ratio = cost_ratio)
+        generate_sku_info_as_json(n_skus = sku_count, n_stages = topology.number_of_stages, ratio = cost_ratio)
         self.sku_info = load_sku_info(filename = 'sku_properties.json')
         self._prepare_generic_info()
         self._prepare_dynamic_info(n_levels=self.n_levels, config = config)
@@ -328,7 +379,10 @@ class SKUInfoFactoryRandom(InfoFactory):
             cost_ratio = config["missed_sale_to_inventory_cost_ratio"]
         except:
             cost_ratio = 100 # default 
-        generate_random_sku_info_as_json2(n_skus = sku_count, n_stages = topology.number_of_stages)
+        if sku_count>150:
+            generate_random_sku_info_as_json2(n_skus = sku_count, n_stages = topology.number_of_stages, config = config)
+        else:
+            generate_random_sku_info_as_json3(n_skus = sku_count, n_stages = topology.number_of_stages, config = config)
         self.sku_info = load_sku_info(filename = 'sku_properties.json')
         self._prepare_generic_info()
         self._prepare_dynamic_info(n_levels=self.n_levels, config = config)
@@ -391,7 +445,6 @@ class SKUInfoFactoryRandom(InfoFactory):
                 ph2: float = 0.05, randvar: float = 1,
                 n_levels = 3, config = None):
 
-
         try:
             sigmax = config['sigmax']
         except:
@@ -437,8 +490,6 @@ class SKUInfoFactoryRandom(InfoFactory):
         # except: 
         #     config_profile = 1 
           
-            
-        print(offset)
         init_transit_order_min = 0
         init_transit_order_max = 1
         assert(init_transit_order_min<init_transit_order_max)

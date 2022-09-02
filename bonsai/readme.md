@@ -19,14 +19,15 @@ The retailer's supply chain resembles a multi-echelon inventory system, where al
 
 [reference: Hubbs et al.: OR-Gym: A Reinforcement Learning Library]
 
-We continue with M=3. As and example, the retailor is located in New York. He makes product purchases from a distribution center in Tennessee, with a lead time of 2 days. The Tennessee distribution center makes the purchases from another distribution center in Los Angeles with a lead time of 3 days. Subsequently, this LA distributor makes purchases from a manufacturer in China with a lead time of 4 days. The manufacturer has access to unlimited supply of raw materials. 
+We continue with M = 3. As and example, the retailor is located in New York. He makes product purchases from a distribution center in Tennessee, with a lead time of 2 days. The Tennessee distribution center makes the purchases from another distribution center in Los Angeles with a lead time of 3 days. Subsequently, this LA distributor makes purchases from a manufacturer in China with a lead time of 4 days. The manufacturer has access to unlimited supply of raw materials. 
 
 ### Solution architecture
 
 We propose a hybrid approach due to the following reasons:
 
 (1) 100s of products with constraints leads to curse of dimensionality where AI only solutions becomes cumbersome if not practically impossible to train. 
-(2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in a time efficient way. Searching for an optimal solution may take very long time due to demand forecast uncertainties.
+
+(2) On the other hand, classical optimization methods becomes practically difficult/impossible to tackle uncertainty in a time efficient way. Searching for an optimal solution may take very long time due to demand forecast uncertainties. Not to mention that other aspects of supply chain such as lead time may become uncertain as well, limiting deterministic classical search methods inefficient to solve the problem. 
 
 As an alternative, we will use brain as a de-fuzzifier that makes a crisp decision on ideal safety stock levels for each product without considering any cross-product constraints. Then classical optimization method of mixed integer programming can be applied. In this approach, We train brain for products with different missed sale to inventory holding cost ratio (e.g. 10, 100, 1000). Once the brains are trained, we use the policies to specify ideal future safety stock level for each product. Then, we construct desired future stock levels as follows: forecast mean + anticipated ideal safety stock levels. Finally, we use mip solver to make final adjustments on the purchase order levels, while satisfying constraints.  
 
@@ -54,16 +55,31 @@ An example demand profile consumed by the simulator is shown below showing actua
 To build bonsai sim package, login using azure-cli and then run the following command.
 
 ```
-az acr build --image IMAGENAME --file Dockerfile_mipPlusBrain --registry YOURBONSAIREGISTRY .
+az acr build --image IMAGENAME --registry YOURBONSAIREGISTRY .
 ```
 
 ### Brain training
 
-Use the following inkling file in bonsai platform to train brain that handles a single sku with wide range of missed sale to inventory cost ratio. You may also chose a separate brain for a specific missed sale to inventory cost ratio. 
+Use the following inkling file in bonsai platform to train brain that handles a single sku with wide range of missed sale to inventory cost ratio. You may also chose a separate brain for a specific missed sale to inventory cost ratio.
+
+To train brain for specif cost ratio, use the following inkling file and modify "cost_ratio" constant near top of the file. The default is cost_ratio = 100. For this tutorial, use the following inkling file.
 
 ```
-MachineTeacher_Tutorial
+MachineTeacher_const_cost_ratio.ink
 ```
+
+In order to train for different cost ratio using single brain training, you may use the following inkling. 
+
+```
+MachineTeacher_range_cost_ratio.ink
+```
+
+To train for a generic use case with variable cost_ratio and lead time, please refer to the following inkling. Please note that we have not done any experiments to support results with variable lead time, yet. Feel free to experiment.
+
+```
+MachineTeacher_generic.ink
+```
+Note that brain training is only required for single sku. For multi-sku, We will export trained single-sku brain and use it within a loop over all the skus. Then the mip solver optimizes the final purchase orders while respecting overall capacity constraints. 
 
 ### Assessment logs
 
@@ -72,8 +88,7 @@ To create assessment logs for
 (1) multi-sku mip plus brain approach:
 first export trained brain and then run
 ```
-python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported 
---log-iterations
+python main_assess_mip_plus_brain_or_other_safety_policy.py --test-exported --test-exported <PORT> --log-iterations
 ```
 (2) multi-sku mip only approach:
 run the following command 
@@ -81,6 +96,7 @@ run the following command
 python main_assess_mip_only.py --test-local --log-iterations 
 ```
 Take note of "assess_config.json" for details of the experiment, such as number of skus and total inventory capacity.
+Also make sure to run the assessments long enough (over 1000 episodes) to account for variabilities due to stochasticity of the environment and for statistically significant results.
 
 ## Results and Analysis
 ### Single SKU brain training (step1 in solution architecture) and assessment results:
